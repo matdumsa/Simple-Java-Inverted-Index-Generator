@@ -1,15 +1,13 @@
 package info.mathieusavard.indexgen;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class GenerateIndex {
 
 	private static final int NUMBER_OF_WORKER_THREADS = 4;
 	private static final String DEFAULT_DIR = "reut";
-	private static final String DEFAULT_EXTENSION = ".sgm";
+	private static final String DEFAULT_EXTENSION = ".xml";
 
 	
 	public static void main(String[] args) {
@@ -23,8 +21,9 @@ public class GenerateIndex {
 		String directory = (args.length > 0) ? args[0] : DEFAULT_DIR;
 		String extension = (args.length > 1) ? args[1] : DEFAULT_EXTENSION;
 
+		SGMPreprocessing.preprocess(directory, directory + "/article");
 		//Step 1: get a list of all files
-		String[] files = Utils.getAllFiles(directory, extension, true);
+		List<String> files = Utils.getAllFiles(directory, extension, true);
 		
 		//Open all files
 		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();

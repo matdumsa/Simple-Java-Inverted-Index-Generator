@@ -1,13 +1,22 @@
 package info.mathieusavard.indexgen;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 
 public class Utils {
 
-	
-	public static String[] getAllFiles(String directoryPath, final String extension, boolean relativePath) {
+	/**
+	 * Look for files matching an extension in a given folder
+	 * @param directoryPath path to look for
+	 * @param extension extension to filter for
+	 * @param relativePath if true will return the path of the file relative to the directoryPath. False will return a full path
+	 * @return array of string, one string per found file
+	 */
+	public static List<String> getAllFiles(String directoryPath, final String extension, boolean relativePath) {
 		File dir = new File(directoryPath);
 
 		FilenameFilter filter = new FilenameFilter() {
@@ -24,7 +33,12 @@ public class Utils {
 		if (relativePath == false)
 			for (int i=0; i<r.length; i++)
 				r[i] = dir.getAbsolutePath() + "/" + r[i];
-		return r;
+
+		List<String> result = new ArrayList<String>();
+		if (r != null) {
+			result = Arrays.asList(r);
+		}
+		return result;
 	}
 	
 	static Pattern noTags = java.util.regex.Pattern.compile("\\<.*?\\>");
@@ -43,7 +57,7 @@ public class Utils {
 	}
 	
 	public static void main(String[] args) {
-		String[] files = Utils.getAllFiles("reuters21578", ".sgm", false);
+		List<String> files = Utils.getAllFiles("reuters21578", ".sgm", false);
 		for (String f : files) {
 			System.out.println(f);
 		}
