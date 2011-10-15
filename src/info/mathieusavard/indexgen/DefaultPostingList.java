@@ -1,6 +1,7 @@
 package info.mathieusavard.indexgen;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -104,7 +105,9 @@ public class DefaultPostingList implements IPostingList {
 	public static DefaultPostingList readFromFile(String path) {
 		try {
 			DefaultPostingList index = new DefaultPostingList();
-			FileReader fstream = new FileReader(path);
+			File inputFile = new File(Constants.basepath + "/" + path);
+			System.out.println("opening " + inputFile.getAbsolutePath());
+			FileReader fstream = new FileReader(inputFile);
 			BufferedReader in = new BufferedReader(fstream);
 			// For each token of the index
 			String line = in.readLine();

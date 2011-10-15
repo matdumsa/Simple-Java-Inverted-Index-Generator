@@ -67,6 +67,8 @@ public class QueryProcessor {
 	}
 	
 	public static int size() {
+		if (matchingDocId == null)
+			return 0;
 		return matchingDocId.size();
 	}
 	
