@@ -4,8 +4,8 @@
 //Ce fichier contient la class main et sera exécuter en premier.
 package info.mathieusavard.arithmetictree;
 
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class ArithmeticTreeMain

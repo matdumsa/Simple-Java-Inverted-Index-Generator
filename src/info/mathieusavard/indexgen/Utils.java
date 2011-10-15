@@ -51,6 +51,12 @@ public class Utils {
 		return noEntities.matcher(input).replaceAll("");
 	}
 	
+	static Pattern noNumber = java.util.regex.Pattern.compile("[^a-z]");
+	public static String noNumber(String input) {
+		return noNumber.matcher(input).replaceAll("");
+	}
+
+	
 	static Pattern noSpecialChar = java.util.regex.Pattern.compile("[^a-z|0-9]");
 	public static String removeSpecialChar(String input) {
 		return noSpecialChar.matcher(input).replaceAll("");
@@ -65,4 +71,11 @@ public class Utils {
 		System.out.println("H@#$ELLO world === " + removeSpecialChar("123H@#$ELLO world"));
 	}
 	
+	public static String padWithZero(int number, int totalLength) {
+		if (number < 10)
+			return "00" + number;
+		if (number < 100)
+			return "0" + number;
+		return String.valueOf(number);
+	}
 }

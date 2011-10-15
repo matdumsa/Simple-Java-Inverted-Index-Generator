@@ -1,11 +1,10 @@
 package info.mathieusavard.indexgen;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class GenerateIndex {
 
-	private static final int NUMBER_OF_WORKER_THREADS = 4;
+	private static final int NUMBER_OF_WORKER_THREADS = 3;
 	private static final String DEFAULT_DIR = "reut";
 	private static final String DEFAULT_EXTENSION = ".xml";
 
@@ -20,22 +19,16 @@ public class GenerateIndex {
 		benchmark.startTimer("total");
 		String directory = (args.length > 0) ? args[0] : DEFAULT_DIR;
 		String extension = (args.length > 1) ? args[1] : DEFAULT_EXTENSION;
-
-		SGMPreprocessing.preprocess(directory, directory + "/article");
-		//Step 1: get a list of all files
-		List<String> files = Utils.getAllFiles(directory, extension, true);
 		
 		//Open all files
 		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();
-		ArrayList<Document> documentCollection = new ArrayList<Document>();
-		for (String documentName : files) {
-				String fileID = documentName.replace("reut2-00", "").replace("reut2-0", "").replace(extension, "");
-				Document d = new Document(directory + "/" + documentName, Integer.parseInt(fileID));
+		ArrayList<ArticleCollection> documentCollection = new ArrayList<ArticleCollection>();
+		for (String documentName : Utils.getAllFiles(directory, extension, false)) {
+				ArticleCollection d = new ArticleCollection(documentName);
 				documentCollection.add(d);
 		} // end of the for all files loop
 
 		final int DOC_PER_THREAD = documentCollection.size() / NUMBER_OF_WORKER_THREADS;
-		InvertedIndex finalIndex = new InvertedIndex();
 
 		benchmark.startTimer("starting-thread");
 		for (int x=0; x<NUMBER_OF_WORKER_THREADS; x++) {
@@ -45,7 +38,7 @@ public class GenerateIndex {
 			System.out.println("Launching thread " + tName + " with" + idx_from + ".." + idx_to);
 			if (x==NUMBER_OF_WORKER_THREADS-1)
 					idx_to = documentCollection.size();
-			TokenizerThread t1 = new TokenizerThread(tName, documentCollection.subList(idx_from, idx_to), finalIndex);
+			TokenizerThread t1 = new TokenizerThread(tName, documentCollection.subList(idx_from, idx_to));
 			t1.start();
 			pool.add(t1);
 		}
@@ -65,10 +58,12 @@ public class GenerateIndex {
 			}
 		}
 
+		//Get rid of the pool and allow garbage collection of their resource
+		pool = null;
 		
 		//Time to write the index to a file
 		benchmark.startTimer("writing-to-file");
-		finalIndex.writeToFile("index.txt");
+		IPostingList finalIndex = SPIMIPostingList.reconcile();
 		benchmark.stopTimer("writing-to-file");
 
 
