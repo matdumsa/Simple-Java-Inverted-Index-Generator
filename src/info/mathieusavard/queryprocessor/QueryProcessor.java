@@ -75,8 +75,9 @@ public class QueryProcessor {
 		//Tokenize query
 		StringTokenizer st = new StringTokenizer(query);
 		ArrayList<String> tokenList = new ArrayList<String>();
+		TokenizerThread tt = new TokenizerThread();
 		while (st.hasMoreTokens()) {	
-			String token = TokenizerThread.compressToken(st.nextToken());
+			String token = tt.compressToken(st.nextToken());
 			if (token != null)
 				tokenList.add(token);
 		}

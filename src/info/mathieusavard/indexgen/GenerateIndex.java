@@ -1,5 +1,6 @@
 package info.mathieusavard.indexgen;
 import java.util.ArrayList;
+import java.util.Stack;
 
 
 public class GenerateIndex {
@@ -22,10 +23,10 @@ public class GenerateIndex {
 		
 		//Open all files
 		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();
-		ArrayList<ArticleCollection> documentCollection = new ArrayList<ArticleCollection>();
+		Stack<ArticleCollection> documentCollection = new Stack<ArticleCollection>();
 		for (String documentName : Utils.getAllFiles(directory, extension, false)) {
 				ArticleCollection d = new ArticleCollection(documentName);
-				documentCollection.add(d);
+				documentCollection.push(d);
 		} // end of the for all files loop
 
 		final int DOC_PER_THREAD = documentCollection.size() / NUMBER_OF_WORKER_THREADS;
@@ -33,15 +34,18 @@ public class GenerateIndex {
 		benchmark.startTimer("starting-thread");
 		for (int x=0; x<NUMBER_OF_WORKER_THREADS; x++) {
 			String tName = "Worker-" + x;
-			int idx_from = x*DOC_PER_THREAD;
-			int idx_to = x*DOC_PER_THREAD+DOC_PER_THREAD;
-			System.out.println("Launching thread " + tName + " with" + idx_from + ".." + idx_to);
-			if (x==NUMBER_OF_WORKER_THREADS-1)
-					idx_to = documentCollection.size();
-			TokenizerThread t1 = new TokenizerThread(tName, documentCollection.subList(idx_from, idx_to));
+
+			Stack<ArticleCollection> subDocList = new Stack<ArticleCollection>();
+			for (int y=0; y<DOC_PER_THREAD && documentCollection.isEmpty() == false; y++) {
+				subDocList.push(documentCollection.pop());
+			}
+
+			TokenizerThread t1 = new TokenizerThread(tName, subDocList);
 			t1.start();
 			pool.add(t1);
 		}
+		
+		documentCollection = null;
 		benchmark.stopTimer("starting-thread");
 		
 		

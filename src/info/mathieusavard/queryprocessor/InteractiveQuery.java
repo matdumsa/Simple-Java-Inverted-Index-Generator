@@ -1,6 +1,7 @@
 package info.mathieusavard.queryprocessor;
 
 import info.mathieusavard.indexgen.Article;
+import info.mathieusavard.indexgen.GenerateIndex;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class InteractiveQuery {
 
 		String query = ""; // Line read from standard in
 		
-		System.out.println("Enter a search query (type 'quit' to exit): ");
+		System.out.println("Enter a search query (type 'quit' to exit and 'index' to re-index): ");
 		InputStreamReader converter = new InputStreamReader(System.in);
 		BufferedReader in = new BufferedReader(converter);
 
@@ -26,9 +27,14 @@ public class InteractiveQuery {
 				e.printStackTrace();
 			}
 			
-			if (!(query.equals("quit"))){
+			if (query.equals("index")) {
+				GenerateIndex.main(new String[] {});
+			}
+			else if (!(query.equals("quit"))){
 				performQuery(query);
 			}
+			System.out.println("Enter a search query (type 'quit' to exit and 'index' to re-index): ");
+
 		}
 		
 		System.out.println("Bye-bye");

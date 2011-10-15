@@ -5,7 +5,6 @@ import java.util.HashMap;
 public class Stemmer {
 
 	private PorterStemmer instance = new PorterStemmer();
-	private HashMap<String, String> cache = new HashMap<String, String>();
 	
 	public String stem(String word) {
 		instance.add(word.toCharArray(), word.length());
@@ -14,13 +13,8 @@ public class Stemmer {
 	}
 	
 	public String stemWithCache(String word) {
-		//Is this response cached?
-		if (cache.containsKey(word))
-			return cache.get(word);
 		
 		String answer = stem(word);
-		//Store in cache
-		cache.put(word, answer);
 		return answer;
 	}
 

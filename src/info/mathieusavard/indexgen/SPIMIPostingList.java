@@ -21,7 +21,8 @@ public class SPIMIPostingList implements IPostingList {
 	private void flushBlock() {
 		if (currentSize > 0) {
 			postingList.writeToFile(String.valueOf(currentBlockNumber));
-			postingList.clear();
+			postingList = new DefaultPostingList();
+			System.out.println("Flushing a block");
 		}
 		
 		currentSize = 0;		

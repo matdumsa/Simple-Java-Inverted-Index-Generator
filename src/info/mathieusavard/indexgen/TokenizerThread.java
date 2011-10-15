@@ -1,6 +1,7 @@
 package info.mathieusavard.indexgen;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
 
@@ -13,16 +14,21 @@ public class TokenizerThread extends Thread {
 	private static final boolean COMPRESSION_STEMMING=true;
 	
 	//create an instance of the stemmer wrapper for the PorterStemmer.
-	private static Stemmer stemmer = new Stemmer();
+	private Stemmer stemmer = new Stemmer();
 	private SPIMIPostingList index = new SPIMIPostingList();;
-	private List<ArticleCollection> filesToProcess;
+	private Stack<ArticleCollection> filesToProcess;
 
-	public TokenizerThread(String tName, List<ArticleCollection> filesToProcess) {
+	public TokenizerThread(String tName, Stack<ArticleCollection> filesToProcess) {
 		this.filesToProcess = filesToProcess;
 	}
 
+	public TokenizerThread() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public void run() {
-		for (ArticleCollection d : filesToProcess) {
+		while (filesToProcess.size() > 0) {
+			ArticleCollection d = filesToProcess.pop();
 			System.out.println("Starting collection"  + d.getFullPath());
 
 			//Obtain all articles
@@ -46,11 +52,11 @@ public class TokenizerThread extends Thread {
 		strLine = Utils.removeEntities(strLine);
 		//Tokenize
 		StringTokenizer st = new StringTokenizer(strLine);
+		TokenizerThread tt = new TokenizerThread();
 		while (st.hasMoreTokens()) {
 			//Read the next token, put to lowercase
 			String token = st.nextToken();
-			
-			token = TokenizerThread.compressToken(token);
+			token = tt.compressToken(token);
 
 			//If the token is not empty, add it
 			if (token != null)
@@ -65,17 +71,25 @@ public class TokenizerThread extends Thread {
 		}
 	}
 	
-	public static String compressToken(String token) {
+	public String compressToken(String token) {
 		if (COMPRESSION_CASE_FOLDING)
 			token = token.toLowerCase();
 
 		if (COMPRESSION_NO_NUMBER)
 			token = Utils.noNumber(token);
 
-		if (COMPRESSION_STEMMING)
-			token = stemmer.stem(token);
+		if (token.isEmpty())
+			return null;
+		
+		try {
+			if (COMPRESSION_STEMMING)
+				token = stemmer.stem(token);
+		}
+		catch(Exception e) {
+			System.err.println("Error stemming " + token);
+		}
 
-		if (COMPRESSION_STOP_WORDS && StopwordRemover.stopwords.contains(token) || token.isEmpty())
+		if (COMPRESSION_STOP_WORDS && StopwordRemover.stopwords.contains(token))
 			return null;
 
 		return token;
