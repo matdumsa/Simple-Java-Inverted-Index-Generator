@@ -1,5 +1,4 @@
 package info.mathieusavard.indexgen;
-import java.util.HashMap;
 
 
 public class Stemmer {

@@ -1,6 +1,5 @@
 package info.mathieusavard.indexgen;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Stack;
 import java.util.StringTokenizer;
 

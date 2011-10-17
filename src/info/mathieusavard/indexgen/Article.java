@@ -1,18 +1,12 @@
 package info.mathieusavard.indexgen;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class Article {
 
-	private Node fragment;
-	private int id;
-	
-	protected Article(Node n) {
-		this.fragment = n;
-	}
-	
+	private Integer id;
+	private String title;
+	private String text;
+		
 	public Article (int id) {
 		this.id = id;
 		
@@ -21,24 +15,32 @@ public class Article {
 		
 		//open this collection
 		ArticleCollection ac = new ArticleCollection(Constants.basepath + "reut/reut2-" + Utils.padWithZero(collection, 3) + ".xml");
-		this.fragment = ac.getArticleById(String.valueOf(this.id)).fragment;
+		Article a = ac.getArticleById(String.valueOf(this.id));
+		this.id = a.id;
+		this.text = a.text;
+		this.title = a.title;
+	}
+
+	public Article(int id, String title, String text) {
+		this.id = id;
+		this.title = title;
+		this.text = text;
 	}
 
 	public int getId() {
-		return Integer.parseInt(((Element) fragment).getAttribute("NEWID"));
+		if (id != null) return id;
+		return 0;
 	}
 	
 	public String getText() {
-		return ((Element) fragment).getElementsByTagName("TEXT").item(0).getTextContent();
+		if (text != null) return text;
+		return "";
 	}
 	
 	public String getTitle() {
-		NodeList nl = ((Element) fragment).getElementsByTagName("TITLE");
-		if (nl.getLength() == 0)
-			return "???";
-		else
-		return nl.item(0).getTextContent();
-		
+		if (title != null) return title;
+
+		return "";
 	}
 	
 }

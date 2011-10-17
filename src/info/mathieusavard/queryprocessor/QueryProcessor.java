@@ -1,7 +1,6 @@
 package info.mathieusavard.queryprocessor;
 
 import info.mathieusavard.indexgen.Article;
-import info.mathieusavard.indexgen.ArticleCollection;
 import info.mathieusavard.indexgen.BenchmarkRow;
 import info.mathieusavard.indexgen.DefaultPostingList;
 import info.mathieusavard.indexgen.TokenizerThread;
@@ -44,7 +43,6 @@ public class QueryProcessor {
 	}
 	
 	public static boolean performBufferedQuery(String query) {
-		ArticleCollection.ENABLE_DOM_CACHING = true;
 		matchingDocId = findMatchingPostingId(query);
 		if (matchingDocId == null || matchingDocId.isEmpty() == true)
 			return false;

@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 
 public class DefaultPostingList implements IPostingList {
@@ -17,6 +17,7 @@ public class DefaultPostingList implements IPostingList {
 	private TreeMap<String, HashSet<Integer>> map = new TreeMap<String, HashSet<Integer>>();
 	
 	private boolean add(String token, HashSet<Integer> documentList) {
+		if (token == null ) return false;
 		if (map.containsKey(token)) {
 			//add this document to the list of document that contains this token
 			map.get(token).addAll(documentList);
@@ -88,10 +89,11 @@ public class DefaultPostingList implements IPostingList {
 			BufferedWriter out = new BufferedWriter(fstream);
 			// For each token of the index
 			for (String token : this) {
-				// Obtain the list of document that contain this token in a string
-				String docList = this.get(token).toString();
 				// Write to the index file
-				out.write(token + "->" + docList + "\n");
+				out.write(token + " ");
+				for (int i : this.get(token))
+					out.write(i +" ");
+				out.write("\n");
 			}
 			// Close the index file.
 			out.close();
@@ -106,29 +108,37 @@ public class DefaultPostingList implements IPostingList {
 		try {
 			DefaultPostingList index = new DefaultPostingList();
 			File inputFile = new File(Constants.basepath + "/" + path);
+			BenchmarkRow timer = new BenchmarkRow(null);
 			System.out.println("opening " + inputFile.getAbsolutePath());
 			FileReader fstream = new FileReader(inputFile);
 			BufferedReader in = new BufferedReader(fstream);
 			// For each token of the index
 			String line = in.readLine();
-			Pattern onlyPostingList = java.util.regex.Pattern.compile("[^0-9|\\s]");
 
+			
 			while (line != null) {
-				String[] tokens = line.split("->");
-				String token = tokens[0];
-				String docList = tokens[1];
-				
+				StringTokenizer st = new StringTokenizer(line);
+				boolean firstToken = true;
+				String posting = null;
 				HashSet<Integer> docSet = new HashSet<Integer>();
 				
-				for (String s : onlyPostingList.matcher(docList).replaceAll("").split(" ")) {
-					docSet.add(Integer.parseInt(s));
+				while (st.hasMoreTokens()) {
+					if (firstToken==true) {
+						firstToken = false;
+						posting = st.nextToken();
+					}
+					else {
+						docSet.add(Integer.parseInt(st.nextToken()));
+					}
 				}
 
-				index.add(token, docSet);
+				index.add(posting, docSet);
 				line = in.readLine();
 			}
 
 			in.close();
+			timer.stop();
+			System.out.println("index took me " + timer.getDuration()/1000.0 + "ms to open");
 			return index;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
