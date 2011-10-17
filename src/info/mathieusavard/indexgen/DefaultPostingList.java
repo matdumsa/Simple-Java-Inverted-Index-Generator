@@ -92,7 +92,7 @@ public class DefaultPostingList implements IPostingList {
 				// Write to the index file
 				out.write(token + " ");
 				for (int i : this.get(token))
-					out.write(i +" ");
+					out.write(Integer.toString(i, Character.MAX_RADIX) +" ");
 				out.write("\n");
 			}
 			// Close the index file.
@@ -109,6 +109,7 @@ public class DefaultPostingList implements IPostingList {
 			DefaultPostingList index = new DefaultPostingList();
 			File inputFile = new File(Constants.basepath + "/" + path);
 			BenchmarkRow timer = new BenchmarkRow(null);
+			timer.start();
 			System.out.println("opening " + inputFile.getAbsolutePath());
 			FileReader fstream = new FileReader(inputFile);
 			BufferedReader in = new BufferedReader(fstream);
@@ -128,7 +129,7 @@ public class DefaultPostingList implements IPostingList {
 						posting = st.nextToken();
 					}
 					else {
-						docSet.add(Integer.parseInt(st.nextToken()));
+						docSet.add(Integer.parseInt(st.nextToken(), Character.MAX_RADIX));
 					}
 				}
 
