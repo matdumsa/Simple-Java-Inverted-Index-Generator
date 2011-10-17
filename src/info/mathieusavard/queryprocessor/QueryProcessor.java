@@ -1,6 +1,7 @@
 package info.mathieusavard.queryprocessor;
 
 import info.mathieusavard.indexgen.Article;
+import info.mathieusavard.indexgen.ArticleFactory;
 import info.mathieusavard.indexgen.BenchmarkRow;
 import info.mathieusavard.indexgen.DefaultPostingList;
 import info.mathieusavard.indexgen.TokenizerThread;
@@ -36,7 +37,7 @@ public class QueryProcessor {
 			return result;
 		else {
 			for (int idxid : matchingDocId) {
-				result.add(new Article(idxid));
+				result.add(ArticleFactory.findArticle(idxid));
 			}
 			return result;
 		}
@@ -57,7 +58,7 @@ public class QueryProcessor {
 		pullingArticletime.start();
 		Article a;
 		if (matchedIterator.hasNext())
-			a = new Article(matchedIterator.next());
+			a = ArticleFactory.findArticle(matchedIterator.next());
 		else
 			a = null;
 		pullingArticletime.stop();

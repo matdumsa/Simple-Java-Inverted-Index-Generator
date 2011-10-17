@@ -109,7 +109,6 @@ public class DefaultPostingList implements IPostingList {
 			DefaultPostingList index = new DefaultPostingList();
 			File inputFile = new File(Constants.basepath + "/" + path);
 			BenchmarkRow timer = new BenchmarkRow(null);
-			timer.start();
 			System.out.println("opening " + inputFile.getAbsolutePath());
 			FileReader fstream = new FileReader(inputFile);
 			BufferedReader in = new BufferedReader(fstream);
@@ -117,23 +116,24 @@ public class DefaultPostingList implements IPostingList {
 			String line = in.readLine();
 
 			
+			String term = null;
 			while (line != null) {
 				StringTokenizer st = new StringTokenizer(line);
 				boolean firstToken = true;
-				String posting = null;
-				HashSet<Integer> docSet = new HashSet<Integer>();
+				HashSet<Integer> postingList = new HashSet<Integer>(st.countTokens());
 				
 				while (st.hasMoreTokens()) {
 					if (firstToken==true) {
 						firstToken = false;
-						posting = st.nextToken();
+						term = st.nextToken();
 					}
 					else {
-						docSet.add(Integer.parseInt(st.nextToken(), Character.MAX_RADIX));
+						postingList.add(Integer.parseInt(st.nextToken(), Character.MAX_RADIX));
 					}
 				}
 
-				index.add(posting, docSet);
+				//No more term to look at
+				index.add(term, postingList);
 				line = in.readLine();
 			}
 

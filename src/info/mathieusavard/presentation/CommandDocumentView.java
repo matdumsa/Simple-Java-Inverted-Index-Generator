@@ -1,6 +1,8 @@
 package info.mathieusavard.presentation;
 
 import info.mathieusavard.indexgen.Article;
+import info.mathieusavard.indexgen.ArticleFactory;
+import info.mathieusavard.indexgen.BenchmarkRow;
 
 import java.io.IOException;
 
@@ -17,8 +19,12 @@ public class CommandDocumentView extends Command {
 
 		String sDocumentId = request.getParameter("d");
 		int documentId = Integer.parseInt(sDocumentId);
-		Article a = new Article(documentId);
+		BenchmarkRow timer = new BenchmarkRow(null);
+		timer.start();
+		Article a = ArticleFactory.findArticle(documentId);
+		timer.stop();
 		request.setAttribute("article", a);
+		request.setAttribute("pull-time", timer.getDuration());
 		
 		RequestDispatcher rd = request.getRequestDispatcher(super.getJSPPAth("document_view.jsp"));
 		rd.forward(request, response);

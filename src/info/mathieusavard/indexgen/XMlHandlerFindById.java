@@ -1,6 +1,6 @@
 package info.mathieusavard.indexgen;
 
-import java.util.ArrayList;
+import info.mathieusavard.utils.HtmlEntities;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -50,7 +50,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 	public void characters(char ch[], int start, int length) throws SAXException {
 			
 		if (isText && isTitle && found) {
-			title = new String(ch, start, length);
+			title += new String(ch, start, length);
 		}
 		if (isText && isBody && found) {
 			text += new String(ch, start, length);
@@ -66,7 +66,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 			isTitle=false;
 		if (qName.equals("BODY") && found) {
 			isBody=false;
-			a = new Article(id, title, text);
+			a = new Article(id, HtmlEntities.encode(title), text);
 			throw new SAXException("done");	
 		}
 	

@@ -7,9 +7,7 @@
 <title>Reuters Search</title>
 </head>
 <body>
+<jsp:include page="searchForm.jsp" />
 
-<form method="get" action="search">
-	<input name="q" type="text" /><input type="submit" value="search" />
-</form>
 </body>
 </html>

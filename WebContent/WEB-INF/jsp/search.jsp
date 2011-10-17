@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import="info.mathieusavard.indexgen.Article, java.util.List, info.mathieusavard.queryprocessor.QueryProcessor"%>
+    pageEncoding="ISO-8859-1" import="info.mathieusavard.indexgen.Article, java.util.List, info.mathieusavard.queryprocessor.QueryProcessor, info.mathieusavard.indexgen.BenchmarkRow"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -7,16 +7,28 @@
 <title>Search results for <%= request.getAttribute("query") %></title>
 </head>
 <body>
+<jsp:include page="searchForm.jsp" />
 
 <% 
+	BenchmarkRow timer = new BenchmarkRow(null);
+	timer.start();
 	if (((Integer) request.getAttribute("result-count")) == 0) {
 %>
 	<h2>Sorry, no results have been found for <%= request.getAttribute("query") %></h2>
 	
-<% } else { 
-	while(QueryProcessor.hasNext()) { Article a = QueryProcessor.next(); %>
+<% } else { %>
+
+I found <%=request.getAttribute("result-count") %> results in <%= request.getAttribute("time-to-match") %> ms.
+
+	<%while(QueryProcessor.hasNext()) { 
+		Article a = QueryProcessor.next(); if (a==null) continue;%>
 		<h3><a href="document/view/?d=<%=a.getId()%>"><%= a.getTitle() %></a></h3>
-	<% }
+	<% 
+	 	response.flushBuffer();
+		}
 }%>
+
+<% timer.stop();  %>
+<hr>Page generated in <%= timer.getDuration()/1000.0 %> seconds.
 </body>
 </html>
