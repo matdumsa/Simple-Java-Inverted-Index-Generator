@@ -66,7 +66,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 			isTitle=false;
 		if (qName.equals("BODY") && found) {
 			isBody=false;
-			a = new Article(id, HtmlEntities.encode(title), text);
+			a = new Article(id, HtmlEntities.encode(title), HtmlEntities.encode(text));
 			throw new SAXException("done");	
 		}
 	

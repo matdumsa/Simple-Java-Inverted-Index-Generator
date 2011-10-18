@@ -1,5 +1,7 @@
 package info.mathieusavard.indexgen;
 
+import info.mathieusavard.utils.HtmlEntities;
+
 import java.util.ArrayList;
 
 import org.xml.sax.Attributes;
@@ -43,7 +45,7 @@ public class XMLHandlerListAll extends DefaultHandler {
 	public void characters(char ch[], int start, int length) throws SAXException {
 			
 		if (isText && isTitle) {
-			title = new String(ch, start, length);
+			title += new String(ch, start, length);
 		}
 		if (isText && isBody) {
 			text += new String(ch, start, length);
@@ -59,7 +61,7 @@ public class XMLHandlerListAll extends DefaultHandler {
 			isTitle=false;
 		if (qName.equals("BODY") ) {
 			isBody=false;
-			al.add(new Article(id, title, text));
+			al.add(new Article(id, HtmlEntities.encode(title), HtmlEntities.encode(text)));
 
 			title="";
 			id=0;

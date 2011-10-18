@@ -93,12 +93,20 @@ public class QueryProcessor {
 					return null; // not found					
 				}
 			}
-			
-			resultSet = SetOperation.intersection(resultSet, postingList.get(token));
-			if (resultSet == null || resultSet.isEmpty()) {
-				resultSet = null;
-				break;
+			else { // second passes
+				Set<Integer> secondSet = postingList.get(token);
+				if (secondSet == null)
+					return null;
+				else
+					resultSet = SetOperation.intersection(resultSet, secondSet);
+
+				if (resultSet == null || resultSet.isEmpty()) {
+					resultSet = null;
+					return null;
+				}
+				
 			}
+			
 		}
 		
 		matchingTime.stop();

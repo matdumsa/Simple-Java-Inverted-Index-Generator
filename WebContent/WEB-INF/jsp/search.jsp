@@ -22,7 +22,7 @@ I found <%=request.getAttribute("result-count") %> results in <%= request.getAtt
 
 	<%while(QueryProcessor.hasNext()) { 
 		Article a = QueryProcessor.next(); if (a==null) continue;%>
-		<h3><a href="document/view/?d=<%=a.getId()%>"><%= a.getTitle() %></a></h3>
+		<h3><a href="document/view/?d=<%=a.getId()%>&q=<%= request.getAttribute("query") %>"><%= a.getTitle() %></a></h3>
 	<% 
 	 	response.flushBuffer();
 		}

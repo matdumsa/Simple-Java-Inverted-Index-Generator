@@ -8,12 +8,40 @@
 <title><%=a.getTitle() %></title>
 <style>
 	div.document { width: 80%; margin:2em auto; }
+	.found { background-color: yellow; }
+	span.label { margin-right:1em; }
 </style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+<script>
+
+function boldify(m){
+    return '<span class="found">'+m+'<\/span>';
+}
+
+function stringToRegExp(pattern, flags){
+    return new RegExp(
+        pattern.replace(/[\[\]\\{}()+*?.$^|]/g, function(m){return '\\'+m;}),
+        flags);
+}
+
+
+	$(function() {
+		$.each($("#q").val().split(" "), function(i,q) {
+			var label = $("<span class='found label'>" + q+ "</span>").appendTo("h2");
+			
+			pattern=stringToRegExp(q, 'gi');
+			$("div.document").html($("div.document").html().replace(pattern, boldify));
+			
+		});
+		
+	});
+</script>
 </head>
 <body>
 <jsp:include page="searchForm.jsp" />
 
 	<h1><%=a.getTitle() %></h1>	
+	<h2></h2>
 	<div class="document">
 		<%=a.getText().replace("\n","<br>").replace("    ","</p><p>")%>
 	</div>
