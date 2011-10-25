@@ -1,4 +1,7 @@
 package info.mathieusavard.indexgen;
+import info.mathieusavard.utils.Property;
+import info.mathieusavard.utils.Utils;
+
 import java.util.HashSet;
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -7,17 +10,17 @@ import java.util.StringTokenizer;
 public class TokenizerThread extends Thread {
 
 	//DICTIONARY COMPRESSION OPTION
-	private static final boolean COMPRESSION_NO_NUMBER=true;
-	private static final boolean COMPRESSION_CASE_FOLDING=true;
-	private static final boolean COMPRESSION_STOP_WORDS=true;
-	private static final boolean COMPRESSION_STEMMING=true;
+	private static final boolean COMPRESSION_NO_NUMBER=Property.getBoolean("COMPRESSION_NO_NUMBER");
+	private static final boolean COMPRESSION_CASE_FOLDING=Property.getBoolean("COMPRESSION_CASE_FOLDING");
+	private static final boolean COMPRESSION_STOP_WORDS=Property.getBoolean("COMPRESSION_STOP_WORDS");
+	private static final boolean COMPRESSION_STEMMING=Property.getBoolean("COMPRESSION_STEMMING");
 	
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
-	private SPIMIPostingList index = new SPIMIPostingList();;
-	private Stack<ArticleCollection> filesToProcess;
+	private SPIMIInvertedIndex index;
+	private Stack<Collection> filesToProcess;
 
-	public TokenizerThread(String tName, Stack<ArticleCollection> filesToProcess) {
+	public TokenizerThread(String tName, Stack<Collection> filesToProcess) {
 		this.filesToProcess = filesToProcess;
 	}
 
@@ -26,15 +29,16 @@ public class TokenizerThread extends Thread {
 	}
 
 	public void run() {
+		index = new SPIMIInvertedIndex();
 		while (filesToProcess.size() > 0) {
-			ArticleCollection d = filesToProcess.pop();
+			Collection d = filesToProcess.pop();
 			System.out.println("Starting collection"  + d.getFullPath());
 
 			//Obtain all articles
 			for (Article a : d.getArticles()) {
 				int id = a.getId();
 				String s = a.getText();
-				processDocument(s, id);				
+				processDocument(s, id);
 			}
 		System.out.println("Done w/"  + d.getFullPath());
 		}

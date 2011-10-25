@@ -1,5 +1,8 @@
 package info.mathieusavard.indexgen;
 
+import info.mathieusavard.utils.Constants;
+
+
 public class ArticleFactory {
 
 	public static Article findArticle(int id) {		
@@ -7,7 +10,7 @@ public class ArticleFactory {
 		int collection = id/1000;
 		
 		//open this collection
-		ArticleCollection ac = new ArticleCollection(Constants.basepath + "reut/reut2-" + Utils.padWithZero(collection, 3) + ".xml");
+		Collection ac = new Collection(Constants.basepath + "/reut/" + collection + "/" + id + ".xml");
 		return ac.getArticleById(String.valueOf(id));
 
 	}

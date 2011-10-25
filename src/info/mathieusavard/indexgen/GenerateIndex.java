@@ -1,20 +1,20 @@
 package info.mathieusavard.indexgen;
+import info.mathieusavard.utils.Constants;
+import info.mathieusavard.utils.Property;
+import info.mathieusavard.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Stack;
 
 
 public class GenerateIndex {
 
-	private static final int NUMBER_OF_WORKER_THREADS = 3;
-	private static final String DEFAULT_DIR = "reut";
+	private static final int NUMBER_OF_WORKER_THREADS = Property.getInt("numOfThreads");
+	private static final String DEFAULT_DIR = Constants.basepath + "/reut";
 	private static final String DEFAULT_EXTENSION = ".xml";
 
 	
 	public static void main(String[] args) {
-
-		if (args.length == 0) {
-			System.out.println("Usage: GenerateIndex pathToFiles [extension]");
-		}
 
 		Benchmark benchmark = new Benchmark();
 		benchmark.startTimer("total");
@@ -23,9 +23,13 @@ public class GenerateIndex {
 		
 		//Open all files
 		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();
-		Stack<ArticleCollection> documentCollection = new Stack<ArticleCollection>();
+		Stack<Collection> documentCollection = new Stack<Collection>();
+
+		if (Property.getBoolean("forceSharding"))
+			XMLSharding.preprocess(directory, directory + "/fragment");
+
 		for (String documentName : Utils.getAllFiles(directory, extension, false)) {
-				ArticleCollection d = new ArticleCollection(documentName);
+				Collection d = new Collection(documentName);
 				documentCollection.push(d);
 		} // end of the for all files loop
 
@@ -35,8 +39,8 @@ public class GenerateIndex {
 		for (int x=0; x<NUMBER_OF_WORKER_THREADS; x++) {
 			String tName = "Worker-" + x;
 
-			Stack<ArticleCollection> subDocList = new Stack<ArticleCollection>();
-			for (int y=0; y<DOC_PER_THREAD && documentCollection.isEmpty() == false; y++) {
+			Stack<Collection> subDocList = new Stack<Collection>();
+			for (int y=0; y<=DOC_PER_THREAD && documentCollection.isEmpty() == false; y++) {
 				subDocList.push(documentCollection.pop());
 			}
 
@@ -64,17 +68,19 @@ public class GenerateIndex {
 
 		//Get rid of the pool and allow garbage collection of their resource
 		pool = null;
+		System.gc();
 		
 		//Time to write the index to a file
 		benchmark.startTimer("writing-to-file");
-		IPostingList finalIndex = SPIMIPostingList.reconcile();
+		SPIMIReconciliation.reconciliate();
 		benchmark.stopTimer("writing-to-file");
 
-
 		benchmark.stopTimer("total");
+
+		int size = DefaultInvertedIndex.readFromFile("index.txt").size();
 		
 		// Display some statistics
-		System.out.println("The inverted index has " + finalIndex.size() + " token");
+		System.out.println("The inverted index has been generated with " + size + " tokens");
 		
 		benchmark.reportOnAllTimer();
 	}

@@ -1,7 +1,11 @@
 package info.mathieusavard.utils;
 
-import java.util.*;
-import java.util.regex.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class offers methods to decode and encode html entities.

@@ -1,5 +1,6 @@
 package info.mathieusavard.queryprocessor;
 
+import info.mathieusavard.arithmetictree.InvalidQueryException;
 import info.mathieusavard.indexgen.Article;
 import info.mathieusavard.indexgen.GenerateIndex;
 
@@ -43,8 +44,13 @@ public class InteractiveQuery {
 	
 	private static void performQuery(String query) {
 		//We buffer the query result not to load in memory 1000000 article is a generic query is used
-		if (QueryProcessor.performBufferedQuery(query) == false) {
-			System.out.println("Not found");
+		try {
+			if (QueryProcessor.performBufferedQuery(query) == false) {
+				System.out.println("Not found");
+				return;
+			}
+		} catch (InvalidQueryException e) {
+			System.out.println("Invalid query");
 			return;
 		}
 

@@ -1,5 +1,6 @@
 package info.mathieusavard.presentation;
 
+import info.mathieusavard.arithmetictree.InvalidQueryException;
 import info.mathieusavard.queryprocessor.QueryProcessor;
 
 import java.io.IOException;
@@ -19,7 +20,11 @@ public class CommandSearch extends Command {
 		request.setAttribute("query", query);
 		
 		System.out.println("searching for " + query);
-		QueryProcessor.performBufferedQuery(query);
+		try {
+			QueryProcessor.performBufferedQuery(query);
+		} catch (InvalidQueryException e) {
+			throw new ServletException(e);
+		}
 		request.setAttribute("time-to-match", QueryProcessor.getMatchingTime());
 		request.setAttribute("result-count", QueryProcessor.size());
 		

@@ -1,11 +1,14 @@
 package info.mathieusavard.queryprocessor;
 
+import info.mathieusavard.arithmetictree.InToPost;
+import info.mathieusavard.arithmetictree.InvalidQueryException;
+import info.mathieusavard.arithmetictree.QueryTree;
+import info.mathieusavard.arithmetictree.QueryTreeBuilder;
 import info.mathieusavard.indexgen.Article;
 import info.mathieusavard.indexgen.ArticleFactory;
 import info.mathieusavard.indexgen.BenchmarkRow;
-import info.mathieusavard.indexgen.DefaultPostingList;
+import info.mathieusavard.indexgen.DefaultInvertedIndex;
 import info.mathieusavard.indexgen.TokenizerThread;
-import info.mathieusavard.utils.SetOperation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,13 +18,13 @@ import java.util.StringTokenizer;
 
 public class QueryProcessor {
 
-	private static DefaultPostingList postingList = DefaultPostingList.readFromFile("index.txt");
-	
+	private static DefaultInvertedIndex postingList = DefaultInvertedIndex.readFromFile("index.txt");
+
 	private static Set<Integer> matchingDocId;
 	private static Iterator<Integer> matchedIterator;
-	private static BenchmarkRow matchingTime = new BenchmarkRow(null);
+	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
-	
+
 	public static long getMatchingTime() {
 		return matchingTime.getDuration();
 	}
@@ -30,7 +33,7 @@ public class QueryProcessor {
 		return pullingArticletime.getDuration();
 	}
 
-	public static List<Article> performQuery(String query) {
+	public static List<Article> performQuery(String query) throws InvalidQueryException {
 		List<Article> result = new ArrayList<Article>();
 		matchingDocId = findMatchingPostingId(query);
 		if (matchingDocId == null || matchingDocId.isEmpty())
@@ -42,15 +45,15 @@ public class QueryProcessor {
 			return result;
 		}
 	}
-	
-	public static boolean performBufferedQuery(String query) {
+
+	public static boolean performBufferedQuery(String query) throws InvalidQueryException {
 		matchingDocId = findMatchingPostingId(query);
 		if (matchingDocId == null || matchingDocId.isEmpty() == true)
 			return false;
 		matchedIterator = matchingDocId.iterator();
 		return true;
 	}
-	
+
 	public static boolean hasNext() {
 		return matchedIterator.hasNext();
 	}
@@ -64,51 +67,62 @@ public class QueryProcessor {
 		pullingArticletime.stop();
 		return a;
 	}
-	
+
 	public static int size() {
 		if (matchingDocId == null)
 			return 0;
 		return matchingDocId.size();
 	}
-	
-	private static Set<Integer> findMatchingPostingId(String query) {
-		matchingTime.start();
-		//Tokenize query
-		StringTokenizer st = new StringTokenizer(query);
-		ArrayList<String> tokenList = new ArrayList<String>();
-		TokenizerThread tt = new TokenizerThread();
-		while (st.hasMoreTokens()) {	
-			String token = tt.compressToken(st.nextToken());
-			if (token != null)
-				tokenList.add(token);
-		}
 
-		Set<Integer> resultSet = null;
-		for (String token : tokenList) {
-			if (resultSet == null) //first pass, look token list
-			{
-				resultSet = postingList.get(token);
-				if (resultSet == null) {
-					matchingTime.stop();
-					return null; // not found					
-				}
-			}
-			else { // second passes
-				Set<Integer> secondSet = postingList.get(token);
-				if (secondSet == null)
-					return null;
-				else
-					resultSet = SetOperation.intersection(resultSet, secondSet);
-
-				if (resultSet == null || resultSet.isEmpty()) {
-					resultSet = null;
-					return null;
-				}
-				
-			}
-			
-		}
+	private static String compressQuery(String query) {
+		query = query.trim();
 		
+		query = query.replace("( ", "(");
+		query = query.replace(" )", ")");
+		query = query.replace(" NOT", " not");
+		query = query.replace("NOT ", "not ");
+		query = query.replace(" AND", " and");
+		query = query.replace("AND ", "and ");
+		query = query.replace(" OR", " or");
+		query = query.replace("OR ", "or ");
+		query = query.replace(" and not ", "^-");
+		query = query.replace(" and not", "^-");
+		query = query.replace(" or not ", "+-");
+		query = query.replace(" or not", "+-");
+		query = query.replace(" and ", "^");
+		query = query.replace(" and", "^");
+		query = query.replace("(not", "(-");
+
+		query = query.replace(" or", "+");
+		query = query.replace("^ ", "^");
+		query = query.replace("- ", "-");
+		query = query.replace("+ ", "+");
+		query = query.replace(" not ", "^-");
+		query = query.replace(" not", "^-");
+		query = query.replace("not ", "-");
+		query = query.replace(" ", "^");
+
+
+		TokenizerThread tt = new TokenizerThread();
+		StringTokenizer st = new StringTokenizer(query,"^-+()", true);
+		String compressedQuery = "";
+		while (st.hasMoreTokens()) {	
+			String token = st.nextToken();
+			if (token.equals("^") || token.equals("-") || token.equals("+") || token.equals("(") || token.equals(")"))
+				compressedQuery = compressedQuery+token;
+			else
+				compressedQuery = compressedQuery+tt.compressToken(token);
+		}
+		return compressedQuery;
+	}
+	private static Set<Integer> findMatchingPostingId(String query) throws InvalidQueryException {
+		matchingTime = new BenchmarkRow(null);
+		matchingTime.start();
+		String compressedQuery = compressQuery(query);
+		System.out.println(compressedQuery);
+		String postfixRepresentation = InToPost.doTrans(compressedQuery);
+		QueryTree qt = QueryTreeBuilder.getTree(postfixRepresentation);
+		Set<Integer> resultSet = qt.getResult(postingList);
 		matchingTime.stop();
 		return resultSet;
 	}

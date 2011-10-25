@@ -47,7 +47,7 @@ public class XMLHandlerListAll extends DefaultHandler {
 		if (isText && isTitle) {
 			title += new String(ch, start, length);
 		}
-		if (isText && isBody) {
+		if (isText) {
 			text += new String(ch, start, length);
 		}
 		
@@ -55,17 +55,18 @@ public class XMLHandlerListAll extends DefaultHandler {
 	
 	public void endElement(String uri, String localName,
 			String qName) throws SAXException {
-		if (qName.equals("TEXT"))
+		
+		if (qName.equals("TEXT")) {
 			isText=false;
+			al.add(new Article(id, HtmlEntities.encode(title), HtmlEntities.encode(text)));
+			title="";
+			id=0;
+			text="";
+		}
 		if (qName.equals("TITLE"))
 			isTitle=false;
 		if (qName.equals("BODY") ) {
 			isBody=false;
-			al.add(new Article(id, HtmlEntities.encode(title), HtmlEntities.encode(text)));
-
-			title="";
-			id=0;
-			text="";
 		}
 	
 		}
