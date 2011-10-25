@@ -1,36 +1,40 @@
 package info.mathieusavard.indexgen;
 
+import info.mathieusavard.utils.Property;
+
 import java.io.File;
+import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SPIMIPostingList implements IPostingList {
+public class SPIMIInvertedIndex implements IInvertedIndex {
 
-	private static final int MEMORY_SIZE = 100000;
+	private static final int MEMORY_SIZE = Property.getInt("SPIMI_MEMORY_SIZE");
 	private static Integer TotalBlockCounter = 0;
 	private int currentBlockNumber;
 	private int currentSize = 0;
-	private DefaultPostingList postingList = new DefaultPostingList();
+	private DefaultInvertedIndex postingList = new DefaultInvertedIndex();
 
-	
-	public SPIMIPostingList() {
+	public SPIMIInvertedIndex() {
 		flushBlock();
+		acquireNewBlock();
 	}
 
 	private void flushBlock() {
 		if (currentSize > 0) {
+			System.out.println("Flushing block " + currentBlockNumber);
 			postingList.writeToFile(String.valueOf(currentBlockNumber));
-			postingList = new DefaultPostingList();
-			System.out.println("Flushing a block");
 		}
 		
-		currentSize = 0;		
 	}
 
 	private synchronized void acquireNewBlock() {
+		postingList = new DefaultInvertedIndex();
 		currentBlockNumber = TotalBlockCounter++;
+		currentSize = 0;
 	}
+	
 	@Override
 	public boolean add(String token, int id) {
 		if (currentSize >= MEMORY_SIZE) {
@@ -56,8 +60,8 @@ public class SPIMIPostingList implements IPostingList {
 	}
 
 	@Override
-	public HashSet<Integer> get(String token) {
-		return postingList.get(token);
+	public AbstractSet<Integer> getSet(String token) {
+		return postingList.getSet(token);
 	}
 
 	@Override
@@ -72,18 +76,22 @@ public class SPIMIPostingList implements IPostingList {
 
 	@Override
 	public void writeToFile(String path) {
-		flushBlock();		
+		flushBlock();
 	}
 	
-	public synchronized static IPostingList reconcile() {
+	public static int getTotalBlock() {
+		return TotalBlockCounter-1;
+	}
+	
+	public synchronized static IInvertedIndex reconcile() {
 		System.out.println("Reconciling");
-		DefaultPostingList finalIndex = null;
+		DefaultInvertedIndex finalIndex = null;
 		for (int i=0; i<TotalBlockCounter; i++) {
 			String blockPath = String.valueOf(i);
 			if (i==0)
-				finalIndex = DefaultPostingList.readFromFile(blockPath);
+				finalIndex = DefaultInvertedIndex.readFromFile(blockPath);
 			else {
-				finalIndex.mergeWith(DefaultPostingList.readFromFile(blockPath));
+				finalIndex.mergeWith(DefaultInvertedIndex.readFromFile(blockPath));
 			}
 			
 			(new File(blockPath)).delete();
@@ -91,6 +99,11 @@ public class SPIMIPostingList implements IPostingList {
 		
 		finalIndex.writeToFile("index.txt");
 		return finalIndex;
+	}
+
+	@Override
+	public HashSet<Integer> getAll() {
+		return postingList.getAll();
 	}
 
 }

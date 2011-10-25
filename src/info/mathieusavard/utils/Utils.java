@@ -1,4 +1,4 @@
-package info.mathieusavard.indexgen;
+package info.mathieusavard.utils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -51,13 +51,13 @@ public class Utils {
 		return noEntities.matcher(input).replaceAll("");
 	}
 	
-	static Pattern noNumber = java.util.regex.Pattern.compile("[^a-z]");
+	static Pattern noNumber = java.util.regex.Pattern.compile("[^a-z|A-Z]");
 	public static String noNumber(String input) {
 		return noNumber.matcher(input).replaceAll("");
 	}
 
 	
-	static Pattern noSpecialChar = java.util.regex.Pattern.compile("[^a-z|0-9]");
+	static Pattern noSpecialChar = java.util.regex.Pattern.compile("[^a-z|0-9|A-Z]");
 	public static String removeSpecialChar(String input) {
 		return noSpecialChar.matcher(input).replaceAll("");
 	}

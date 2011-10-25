@@ -1,22 +1,30 @@
 package info.mathieusavard.indexgen;
+import info.mathieusavard.utils.Constants;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 
-public class DefaultPostingList implements IPostingList {
+public class DefaultInvertedIndex implements IInvertedIndex {
 
-	private TreeMap<String, HashSet<Integer>> map = new TreeMap<String, HashSet<Integer>>();
+	private AbstractMap<String, AbstractCollection<Integer>> map = new TreeMap<String, AbstractCollection<Integer>>();
 	
-	private boolean add(String token, HashSet<Integer> documentList) {
+	boolean add(String token, AbstractCollection<Integer> documentList) {
 		if (token == null ) return false;
 		if (map.containsKey(token)) {
 			//add this document to the list of document that contains this token
@@ -33,14 +41,16 @@ public class DefaultPostingList implements IPostingList {
 		// If this token is already in our index
 		if (map.containsKey(token)) {
 			//add this document to the list of document that contains this token
-			if (map.get(token).add(id) == true) // if this is a new document/token pair
-				return true;
-			else
+			if (map.get(token).contains(id))
 				return false;
+			else {
+				map.get(token).add(id); // if this is a new document/token pair
+				return true;
+			}
 		}
 		else {
 			// Not already present, create a new list of document name
-			HashSet<Integer> documentList = new HashSet<Integer>();
+			ArrayList<Integer> documentList = new ArrayList<Integer>();
 			// Add this document to the list
 			documentList.add(id);
 			// Add this list of document to the index
@@ -52,9 +62,9 @@ public class DefaultPostingList implements IPostingList {
 	/*
 	 * This method merges index b into index a.
 	 */
-	public synchronized void mergeWith(IPostingList b) {
+	public synchronized void mergeWith(DefaultInvertedIndex b) {
 		for (String tokenb : b) {
-			this.add(tokenb, b.get(tokenb));
+			this.add(tokenb, b.map.get(tokenb));
 		}
 	}
 	
@@ -69,9 +79,17 @@ public class DefaultPostingList implements IPostingList {
 	}
 
 	@Override
-	public HashSet<Integer> get(String token) {
-		return map.get(token);
+	public AbstractSet<Integer> getSet(String token) {
+		AbstractCollection<Integer> c = map.get(token);
+		if (c == null)
+			return new HashSet<Integer>();
+
+		HashSet<Integer> r = new HashSet<Integer>(map.get(token).size());
+		for (int n : map.get(token))
+			r.add(n);
+		return r;
 	}
+	
 	
 	@Override
 	public Iterator<String> iterator() {
@@ -85,13 +103,13 @@ public class DefaultPostingList implements IPostingList {
 	@Override
 	public synchronized void writeToFile(String path) {
 		try {
-			FileWriter fstream = new FileWriter(path);
+			FileWriter fstream = new FileWriter(Constants.basepath + "/" + path);
 			BufferedWriter out = new BufferedWriter(fstream);
 			// For each token of the index
 			for (String token : this) {
 				// Write to the index file
 				out.write(token + " ");
-				for (int i : this.get(token))
+				for (int i : this.getSet(token))
 					out.write(Integer.toString(i, Character.MAX_RADIX) +" ");
 				out.write("\n");
 			}
@@ -104,9 +122,11 @@ public class DefaultPostingList implements IPostingList {
 
 	}
 	
-	public static DefaultPostingList readFromFile(String path) {
+	public static DefaultInvertedIndex readFromFile(String path) {
 		try {
-			DefaultPostingList index = new DefaultPostingList();
+			LinkedList<String> tokens = new LinkedList<String>();
+			LinkedList<Integer[]> posting = new LinkedList<Integer[]>();
+
 			File inputFile = new File(Constants.basepath + "/" + path);
 			BenchmarkRow timer = new BenchmarkRow(null);
 			System.out.println("opening " + inputFile.getAbsolutePath());
@@ -120,31 +140,51 @@ public class DefaultPostingList implements IPostingList {
 			while (line != null) {
 				StringTokenizer st = new StringTokenizer(line);
 				boolean firstToken = true;
-				HashSet<Integer> postingList = new HashSet<Integer>(st.countTokens());
-				
+				Integer[] postingList = new Integer[st.countTokens()-1];
+				int i=0;
 				while (st.hasMoreTokens()) {
 					if (firstToken==true) {
 						firstToken = false;
 						term = st.nextToken();
 					}
 					else {
-						postingList.add(Integer.parseInt(st.nextToken(), Character.MAX_RADIX));
+						postingList[i++] = Integer.parseInt(st.nextToken(), Character.MAX_RADIX);
 					}
 				}
-
-				//No more term to look at
-				index.add(term, postingList);
+				
+				tokens.add(term);
+				posting.add(postingList);
 				line = in.readLine();
 			}
 
 			in.close();
 			timer.stop();
 			System.out.println("index took me " + timer.getDuration()/1000.0 + "ms to open");
-			return index;
+
+			
+			TreeMap<String, AbstractCollection<Integer>> newMap = new TreeMap<String, AbstractCollection<Integer>>();
+			while(tokens.size()>0) {
+				String token = tokens.get(0);
+				tokens.remove(0);
+				AbstractCollection<Integer> c = new LinkedList<Integer>(Arrays.asList(posting.get(0)));
+				posting.remove(0);
+				newMap.put(token, c);
+			}
+			DefaultInvertedIndex dii = new DefaultInvertedIndex();
+			dii.map = newMap;
+			return dii;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public HashSet<Integer> getAll() {
+		HashSet<Integer> all = new HashSet<Integer>();
+		for (String s : map.keySet()) {
+			all.addAll(map.get(s));
+		}
+		return all;
 	}
 }

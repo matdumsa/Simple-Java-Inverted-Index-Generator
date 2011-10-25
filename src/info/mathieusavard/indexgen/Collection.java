@@ -11,12 +11,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
-public class ArticleCollection {
+public class Collection {
 
 	private String fullPath;
-	private XMLHandlerListAll reader;
 	
-	public ArticleCollection(String fullPath) {
+	public Collection(String fullPath) {
 		super();
 		this.fullPath = fullPath;
 	}

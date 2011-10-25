@@ -3,18 +3,24 @@
 //ArithmeticTreeNode.java
 package info.mathieusavard.arithmetictree;
 
-public class ArithmeticTreeNode
+import info.mathieusavard.indexgen.IInvertedIndex;
+import info.mathieusavard.utils.SetOperation;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class QueryTreeNode
 {
     private String element;
-    private ArithmeticTreeNode left;
-    private ArithmeticTreeNode right;
+    private QueryTreeNode left;
+    private QueryTreeNode right;
     
-    public ArithmeticTreeNode(String elem)
+    public QueryTreeNode(String elem)
     {
     	this.element = elem;
     }
 
-    public ArithmeticTreeNode(String elem, ArithmeticTreeNode left, ArithmeticTreeNode right)
+    public QueryTreeNode(String elem, QueryTreeNode left, QueryTreeNode right)
     {
     	this.element = elem;
     	this.left = left;
@@ -29,34 +35,43 @@ public class ArithmeticTreeNode
     		return false;
     }
 
-    public ArithmeticTreeNode getLeftNode()
+    public QueryTreeNode getLeftNode()
     { return left;  }
 
-    public ArithmeticTreeNode getRightNode()
+    public QueryTreeNode getRightNode()
     { return right;  }
 
-    public double getResult()
+    public Set<Integer> getResult(IInvertedIndex index)
     {	//C'est ici que les calculs sont effectués pour un noeud.
-    	if (isLeaf())
-    		return Double.parseDouble(element);
+    	if (isLeaf()) {
+    		Set<Integer> possibleAnswer = null;
+    		if (element.charAt(0) == '-') {
+    			element = element.substring(1);
+        		possibleAnswer = (Set<Integer>) index.getSet(element);
+        		if (possibleAnswer == null)
+        			return index.getAll();
+        		possibleAnswer = SetOperation.difference(index.getAll(), possibleAnswer);
+    		}
+    		else {
+        		possibleAnswer = (Set<Integer>) index.getSet(element);    			
+    		}
+    		if (possibleAnswer == null)
+    			return new HashSet<Integer>(); //empty set
+    		return possibleAnswer;
+    	}
 	else {
 			String opcode = element;
-			Double operandL = left.getResult();
-			Double operandR = right.getResult();
+			Set<Integer> operandL = left.getResult(index);
+			Set<Integer> operandR = right.getResult(index);
 			if (opcode.equals("+"))
-				return operandL + operandR;
+				return SetOperation.union(operandL, operandR);
 			else if (opcode.equals("-"))
-				return operandL - operandR;
-			else if (opcode.equals("*"))
-				return operandL * operandR;
-			else if (opcode.equals("/"))
-			{	if (operandR==0)
-					System.out.println("Division par zéro");
-				return operandL / operandR;
-			}
+				return SetOperation.difference(operandL, operandR);
+			else if (opcode.equals("^"))
+				return SetOperation.intersection(operandL, operandR);
 			else
 			{	System.out.println("Hm... symbole inconun \"" + opcode + "\"");
-				return 0;
+				return null;
 			}
 		}
 
@@ -66,7 +81,7 @@ public class ArithmeticTreeNode
     {	return element;
     }
     
-    public boolean equals(ArithmeticTreeNode otherNode)
+    public boolean equals(QueryTreeNode otherNode)
         {	
     	if (isLeaf() != otherNode.isLeaf())
     		return false;	//one is a leaf the other is not... 
@@ -81,4 +96,5 @@ public class ArithmeticTreeNode
     			return (left.equals(otherNode.left) && right.equals(otherNode.right));
     	
     }
+
 }
