@@ -11,20 +11,17 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
-public class Collection {
+public class ParsableArticleCollection {
 
 	private String fullPath;
 	
-	public Collection(String fullPath) {
+	public ParsableArticleCollection(String fullPath) {
 		super();
 		this.fullPath = fullPath;
 	}
 
 	public String getFullPath() {
 		return fullPath;
-	}
-	public void setFullPath(String fullPath) {
-		this.fullPath = fullPath;
 	}
 
 	private void parseDom(DefaultHandler handler) {
