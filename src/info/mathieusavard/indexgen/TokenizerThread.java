@@ -18,9 +18,9 @@ public class TokenizerThread extends Thread {
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
-	private Stack<Collection> filesToProcess;
+	private Stack<ParsableArticleCollection> filesToProcess;
 
-	public TokenizerThread(String tName, Stack<Collection> filesToProcess) {
+	public TokenizerThread(String tName, Stack<ParsableArticleCollection> filesToProcess) {
 		this.filesToProcess = filesToProcess;
 	}
 
@@ -31,7 +31,7 @@ public class TokenizerThread extends Thread {
 	public void run() {
 		index = new SPIMIInvertedIndex();
 		while (filesToProcess.size() > 0) {
-			Collection d = filesToProcess.pop();
+			ParsableArticleCollection d = filesToProcess.pop();
 			System.out.println("Starting collection"  + d.getFullPath());
 
 			//Obtain all articles

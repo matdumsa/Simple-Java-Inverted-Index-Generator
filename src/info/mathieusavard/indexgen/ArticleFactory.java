@@ -10,7 +10,7 @@ public class ArticleFactory {
 		int collection = id/1000;
 		
 		//open this collection
-		Collection ac = new Collection(Constants.basepath + "/reut/" + collection + "/" + id + ".xml");
+		ParsableArticleCollection ac = new ParsableArticleCollection(Constants.basepath + "/reut/" + collection + "/" + id + ".xml");
 		return ac.getArticleById(String.valueOf(id));
 
 	}

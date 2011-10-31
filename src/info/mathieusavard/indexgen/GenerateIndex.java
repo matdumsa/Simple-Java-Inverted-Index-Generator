@@ -23,13 +23,13 @@ public class GenerateIndex {
 		
 		//Open all files
 		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();
-		Stack<Collection> documentCollection = new Stack<Collection>();
+		Stack<ParsableArticleCollection> documentCollection = new Stack<ParsableArticleCollection>();
 
 		if (Property.getBoolean("forceSharding"))
 			XMLSharding.preprocess(directory, directory + "/fragment");
 
 		for (String documentName : Utils.getAllFiles(directory, extension, false)) {
-				Collection d = new Collection(documentName);
+				ParsableArticleCollection d = new ParsableArticleCollection(documentName);
 				documentCollection.push(d);
 		} // end of the for all files loop
 
@@ -39,7 +39,7 @@ public class GenerateIndex {
 		for (int x=0; x<NUMBER_OF_WORKER_THREADS; x++) {
 			String tName = "Worker-" + x;
 
-			Stack<Collection> subDocList = new Stack<Collection>();
+			Stack<ParsableArticleCollection> subDocList = new Stack<ParsableArticleCollection>();
 			for (int y=0; y<=DOC_PER_THREAD && documentCollection.isEmpty() == false; y++) {
 				subDocList.push(documentCollection.pop());
 			}

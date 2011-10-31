@@ -1,7 +1,7 @@
 package info.mathieusavard.utils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class Property {
@@ -9,7 +9,8 @@ public class Property {
 	static {
 		properties = new Properties();
 		try {
-			FileInputStream fis = new FileInputStream("ParserConfig.properties");
+			InputStream fis = Property.class.getClassLoader().getResourceAsStream("ParserConfig.properties");
+//			FileInputStream fis = new FileInputStream("ParserConfig.properties");
 		    properties.load(fis);
 		} catch (IOException e) {
 			System.err.println("Error reading property file");

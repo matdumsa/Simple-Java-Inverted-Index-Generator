@@ -124,8 +124,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	
 	public static DefaultInvertedIndex readFromFile(String path) {
 		try {
-			LinkedList<String> tokens = new LinkedList<String>();
-			LinkedList<Integer[]> posting = new LinkedList<Integer[]>();
+			TreeMap<String, AbstractCollection<Integer>> newMap = new TreeMap<String, AbstractCollection<Integer>>();
 
 			File inputFile = new File(Constants.basepath + "/" + path);
 			BenchmarkRow timer = new BenchmarkRow(null);
@@ -152,8 +151,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 					}
 				}
 				
-				tokens.add(term);
-				posting.add(postingList);
+				newMap.put(term, new LinkedList<Integer>(Arrays.asList((postingList))));
 				line = in.readLine();
 			}
 
@@ -161,15 +159,6 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			timer.stop();
 			System.out.println("index took me " + timer.getDuration()/1000.0 + "ms to open");
 
-			
-			TreeMap<String, AbstractCollection<Integer>> newMap = new TreeMap<String, AbstractCollection<Integer>>();
-			while(tokens.size()>0) {
-				String token = tokens.get(0);
-				tokens.remove(0);
-				AbstractCollection<Integer> c = new LinkedList<Integer>(Arrays.asList(posting.get(0)));
-				posting.remove(0);
-				newMap.put(token, c);
-			}
 			DefaultInvertedIndex dii = new DefaultInvertedIndex();
 			dii.map = newMap;
 			return dii;
