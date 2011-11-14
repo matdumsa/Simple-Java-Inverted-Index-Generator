@@ -1,5 +1,7 @@
 package info.mathieusavard.indexgen;
 
+import java.util.StringTokenizer;
+
 
 public class Article {
 
@@ -11,7 +13,7 @@ public class Article {
 	public Article(int id, String title, String text) {
 		this.id = id;
 		this.title = (title==null)?"??? UNKNOWN TITLE ???" : title;
-		this.text = (text==null)?"???" : text;
+		this.text = (text==null)?"???" : text.trim();
 	}
 
 	public int getId() {
@@ -28,6 +30,21 @@ public class Article {
 		if (title != null) return title;
 
 		return "";
+	}
+	
+	private int length = -1;
+	public int getLengthInWords() {
+		if (length>=0) return length;
+		StringTokenizer st = new StringTokenizer(getText());
+		length=st.countTokens();
+		return length;
+	}
+	
+	/**
+	 * Should be called in a crawler when you want to keep only the 
+	 */
+	public void clearContent() {
+		text=null;
 	}
 	
 }

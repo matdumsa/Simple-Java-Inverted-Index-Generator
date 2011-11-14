@@ -18,7 +18,7 @@ public class TokenizerThread extends Thread {
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
 	private Stack<ParsableArticleCollection> filesToProcess;
-
+	
 	public TokenizerThread(String tName, Stack<ParsableArticleCollection> filesToProcess) {
 		this.filesToProcess = filesToProcess;
 	}
@@ -38,6 +38,9 @@ public class TokenizerThread extends Thread {
 				int id = a.getId();
 				String s = a.getText();
 				processDocument(s, id);
+				ArticleCollection.addArticle(a);
+				a.getLengthInWords();
+				a.clearContent();
 			}
 		System.out.println("Done w/"  + d.getFullPath());
 		}
@@ -46,11 +49,11 @@ public class TokenizerThread extends Thread {
 
 	}
 
-	private void processDocument(String strLine, int docId) {
+	private void processDocument(String text, int docId) {
 		//Remove all &entities;
-		strLine = Utils.removeEntities(strLine);
+		text = Utils.removeEntities(text);
 		//Tokenize
-		StringTokenizer st = new StringTokenizer(strLine);
+		StringTokenizer st = new StringTokenizer(text);
 		TokenizerThread tt = new TokenizerThread();
 		while (st.hasMoreTokens()) {
 			//Read the next token, put to lowercase
