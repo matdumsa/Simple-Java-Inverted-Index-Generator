@@ -1,6 +1,6 @@
 package info.mathieusavard.indexgen;
 
-public class Posting {
+public class Posting implements Comparable<Posting> {
 
 	private int documentId;
 	private int occurence;
@@ -32,6 +32,10 @@ public class Posting {
 	}
 	
 	@Override
+	public int hashCode() {
+		return getDocumentId();
+	}
+	@Override
 	public boolean equals(Object o) {
 		if ((o instanceof Posting) == false)
 			return false;
@@ -52,5 +56,10 @@ public class Posting {
 	
 	public String toString() {
 		return Integer.toString(getDocumentId(), Character.MAX_RADIX) + ":" + Integer.toString(getOccurence(), Character.MAX_RADIX);
+	}
+
+	@Override
+	public int compareTo(Posting p) {
+		return new Integer(this.getDocumentId()).compareTo(p.getDocumentId());
 	}
 }

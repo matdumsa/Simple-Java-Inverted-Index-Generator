@@ -57,6 +57,7 @@ public class QueryTreeNode
     		else {
     			queryTerms += ((queryTerms.length()==0) ?"":" ") + element;
         		possibleAnswer = (Set<Posting>) index.getSet(element);    			
+        		System.out.println("  Found" + possibleAnswer.size() + " for term '" + element + "'");
     		}
     		if (possibleAnswer == null)
     			return new HashSet<Posting>(); //empty set
