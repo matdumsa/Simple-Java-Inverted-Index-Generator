@@ -10,6 +10,7 @@ import info.mathieusavard.indexgen.BenchmarkRow;
 import info.mathieusavard.indexgen.DefaultInvertedIndex;
 import info.mathieusavard.indexgen.Posting;
 import info.mathieusavard.indexgen.TokenizerThread;
+import info.mathieusavard.utils.Property;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -101,8 +102,13 @@ public class QueryProcessor {
 		query = query.replace(" not ", "^-");
 		query = query.replace(" not", "^-");
 		query = query.replace("not ", "-");
-		query = query.replace(" ", "^");
 
+		if (Property.getBoolean("DefaultToOr") == true)
+			//Setting the default boolean operator between words to OR
+			query = query.replace(" ", "+");
+		else
+			//Setting the default boolean operator between words to AND
+			query = query.replace(" ", "^");
 
 		TokenizerThread tt = new TokenizerThread();
 		StringTokenizer st = new StringTokenizer(query,"^-+()", true);
