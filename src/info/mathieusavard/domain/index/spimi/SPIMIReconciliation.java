@@ -1,5 +1,6 @@
 package info.mathieusavard.domain.index.spimi;
 
+import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.technicalservices.Constants;
 
@@ -24,7 +25,7 @@ public class SPIMIReconciliation {
 			BufferedWriter out = new BufferedWriter(new FileWriter(Constants.basepath + "/index.txt"));
 
 			for (int i=0; i<=totalBlock; i++) {
-				buffReadArr[i] = new LineNumberReader(new FileReader(Constants.basepath + "/" + String.valueOf(i)));
+				buffReadArr[i] = new LineNumberReader(new FileReader(Constants.basepath + "/" + String.valueOf(i) + ".spimi"));
 				lastLineRead[i]= null;
 			}
 
@@ -44,8 +45,11 @@ public class SPIMIReconciliation {
 
 			//Get rid of these files now.
 			for (int i=0; i<=totalBlock; i++) {
-				(new File(Constants.basepath + "/" + String.valueOf(i))).delete();
+				(new File(Constants.basepath + "/" + String.valueOf(i) + ".spimi")).delete();
 			}
+			
+			Corpus.writeToDisk();
+
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

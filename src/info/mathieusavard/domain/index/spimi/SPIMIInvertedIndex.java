@@ -25,7 +25,7 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	private void flushBlock() {
 		if (currentSize > 0) {
 			System.out.println("Flushing block " + currentBlockNumber);
-			postingList.writeToFile(String.valueOf(currentBlockNumber));
+			postingList.writeToFile(String.valueOf(currentBlockNumber) + ".spimi");
 		}
 		
 	}
@@ -88,7 +88,7 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 		System.out.println("Reconciling");
 		DefaultInvertedIndex finalIndex = null;
 		for (int i=0; i<TotalBlockCounter; i++) {
-			String blockPath = String.valueOf(i);
+			String blockPath = String.valueOf(i) + ".spimi";
 			if (i==0)
 				finalIndex = DefaultInvertedIndex.readFromFile(blockPath);
 			else {

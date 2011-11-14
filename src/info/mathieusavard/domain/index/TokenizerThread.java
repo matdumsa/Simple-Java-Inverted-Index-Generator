@@ -18,39 +18,80 @@ public class TokenizerThread extends Thread {
 	private static final boolean COMPRESSION_CASE_FOLDING=Property.getBoolean("COMPRESSION_CASE_FOLDING");
 	private static final boolean COMPRESSION_STOP_WORDS=Property.getBoolean("COMPRESSION_STOP_WORDS");
 	private static final boolean COMPRESSION_STEMMING=Property.getBoolean("COMPRESSION_STEMMING");
-	
+
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
-	private Stack<ParsableArticleCollection> filesToProcess;
-	
+	private Stack<Document> filesToProcess;
+	//When set to true, the thread will sleep waiting for new document to index
+	private boolean acceptNewDocument = false;
+
+	//When set to true, the thread will stop waiting for new document and return once it wakes up
+	private boolean terminate = false;
+
 	public TokenizerThread(String tName, Stack<ParsableArticleCollection> filesToProcess) {
-		this.filesToProcess = filesToProcess;
+		this.filesToProcess = new Stack<Document>();
+		for (ParsableArticleCollection c : filesToProcess) {
+			this.filesToProcess.addAll(c.getArticles());
+		}
+	}
+
+	public TokenizerThread(String tName) {
+		this.filesToProcess = null;
+		acceptNewDocument = true;
+		filesToProcess = new Stack<Document>();
 	}
 
 	public TokenizerThread() {
-		// TODO Auto-generated constructor stub
+
 	}
 
+	public Document popOrWait() {
+		Document d = null;
+		while (d==null) {
+			synchronized(filesToProcess) {
+				try {
+					d = filesToProcess.pop();
+				} catch (Exception e) {
+					try {
+						if (this.terminate==true)
+							return null;
+						filesToProcess.wait();
+						if (this.terminate==true)
+							return null;
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		}
+		return d;
+	}
 	public void run() {
 		index = new SPIMIInvertedIndex();
-		while (filesToProcess.size() > 0) {
-			ParsableArticleCollection d = filesToProcess.pop();
-			System.out.println("Starting collection"  + d.getFullPath());
 
-			//Obtain all articles
-			for (Document a : d.getArticles()) {
-				int id = a.getId();
-				String s = a.getText();
-				processDocument(s, id);
-				Corpus.addArticle(a);
-				a.getLengthInWords();
-				a.clearContent();
+		Document d = popOrWait();
+		while (d != null) {
+			int id = d.getId();
+			String s = d.getText();
+			processDocument(s, id);
+			Corpus.addArticle(d);
+			d.getLengthInWords();
+			d.clearContent();
+			if (acceptNewDocument == false) {
+				if (filesToProcess.size()>0)
+					d = filesToProcess.pop();
+				else
+					d=null;
 			}
-		System.out.println("Done w/"  + d.getFullPath());
+			else {
+				d = popOrWait();
+			}
 		}
 
 		index.writeToFile("");
+		if (acceptNewDocument == true && terminate == true)
+			SPIMIInvertedIndex.reconcile();
 
 	}
 
@@ -71,7 +112,7 @@ public class TokenizerThread extends Thread {
 			}
 		} // end of the for all token loop
 	}
-	
+
 	public String compressToken(String token) {
 		if (COMPRESSION_CASE_FOLDING)
 			token = token.toLowerCase();
@@ -81,7 +122,7 @@ public class TokenizerThread extends Thread {
 
 		if (token.isEmpty())
 			return null;
-		
+
 		try {
 			if (COMPRESSION_STEMMING)
 				token = stemmer.stem(token);
@@ -94,5 +135,23 @@ public class TokenizerThread extends Thread {
 			return null;
 
 		return token;
+	}
+
+	public void stopThread() {
+		this.terminate=true;
+		synchronized(filesToProcess) {
+			filesToProcess.notify();
+		}
+		System.out.println("Starting reconciliation");
+
+	}
+
+	public void addDocument(Document d) {
+		if (this.acceptNewDocument == false)
+			throw new RuntimeException("You cannot add document is this tokenizer thread is not expecting them");
+		synchronized(filesToProcess) {
+			filesToProcess.push(d);
+			filesToProcess.notify();
+		}
 	}
 }

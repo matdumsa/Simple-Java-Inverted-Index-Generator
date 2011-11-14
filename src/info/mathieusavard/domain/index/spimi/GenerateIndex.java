@@ -71,7 +71,6 @@ public class GenerateIndex {
 			}
 		}
 
-		Corpus.writeToDisk();
 		//Get rid of the pool and allow garbage collection of their resource
 		pool = null;
 		System.gc();
