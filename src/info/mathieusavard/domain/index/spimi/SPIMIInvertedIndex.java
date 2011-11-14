@@ -84,24 +84,6 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 		return TotalBlockCounter-1;
 	}
 	
-	public synchronized static IInvertedIndex reconcile() {
-		System.out.println("Reconciling");
-		DefaultInvertedIndex finalIndex = null;
-		for (int i=0; i<TotalBlockCounter; i++) {
-			String blockPath = String.valueOf(i) + ".spimi";
-			if (i==0)
-				finalIndex = DefaultInvertedIndex.readFromFile(blockPath);
-			else {
-				finalIndex.mergeWith(DefaultInvertedIndex.readFromFile(blockPath));
-			}
-			
-			(new File(blockPath)).delete();
-		}
-		
-		finalIndex.writeToFile("index.txt");
-		return finalIndex;
-	}
-
 	@Override
 	public HashSet<Posting> getAll() {
 		return postingList.getAll();

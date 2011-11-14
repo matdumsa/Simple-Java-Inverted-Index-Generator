@@ -4,6 +4,7 @@ import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
 import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
+import info.mathieusavard.domain.index.spimi.SPIMIReconciliation;
 import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 
@@ -89,9 +90,9 @@ public class TokenizerThread extends Thread {
 			}
 		}
 
-		index.writeToFile("");
+		index.writeToFile(""); // flush the last spimi shard
 		if (acceptNewDocument == true && terminate == true)
-			SPIMIInvertedIndex.reconcile();
+			SPIMIReconciliation.reconciliate();
 
 	}
 
