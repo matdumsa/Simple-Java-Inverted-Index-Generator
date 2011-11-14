@@ -4,7 +4,7 @@
     <description></description>
     <display-name>RequestHandler</display-name>
     <servlet-name>RequestHandler</servlet-name>
-    <servlet-class>info.mathieusavard.presentation.RequestHandler</servlet-class>
+    <servlet-class>info.mathieusavard.application.web.RequestHandler</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>RequestHandler</servlet-name>
