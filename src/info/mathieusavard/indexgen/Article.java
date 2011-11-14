@@ -12,8 +12,14 @@ public class Article {
 
 	public Article(int id, String title, String text) {
 		this.id = id;
-		this.title = (title==null)?"??? UNKNOWN TITLE ???" : title;
-		this.text = (text==null)?"???" : text.trim();
+		this.title = (title==null)?"??? UNKNOWN TITLE ???" : title.trim();
+		this.text = (text==null)?"???" : text;
+	}
+
+	public Article(int id, String title, int length) {
+		this.id =id;
+		this.title = title;
+		this.length = length;
 	}
 
 	public int getId() {
@@ -23,7 +29,8 @@ public class Article {
 	
 	public String getText() {
 		if (text != null) return text;
-		return "";
+		//Make article act as a proxy here
+		return ArticleFactory.findArticle(getId()).getText();
 	}
 	
 	public String getTitle() {
