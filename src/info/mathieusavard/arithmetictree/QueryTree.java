@@ -35,7 +35,12 @@ public class QueryTree
 
     public Set<Posting> getResult(IInvertedIndex index)
     {	
+    	QueryTreeNode.queryTerms="";
     	return root.getResult(index);
+    }
+    
+    public String getAllMatchedTerms() {
+    	return QueryTreeNode.queryTerms;
     }
 
 }

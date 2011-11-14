@@ -12,7 +12,7 @@ public class Article {
 
 	public Article(int id, String title, String text) {
 		this.id = id;
-		this.title = (title==null)?"??? UNKNOWN TITLE ???" : title.trim();
+		this.title = (title==null)?"??? UNKNOWN TITLE ???" : title.trim().replace('\n', ' ');
 		this.text = (text==null)?"???" : text;
 	}
 

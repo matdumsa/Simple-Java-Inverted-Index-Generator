@@ -60,8 +60,9 @@ public class InteractiveQuery {
 			System.out.println("showing the first " + MAX_RESULTS + " results");
 			
 		while (QueryProcessor.hasNext()) {
-			Article a = QueryProcessor.next();
-			System.out.print(a.getId());
+			Result r =  QueryProcessor.next();
+			Article a = r.getResult();
+			System.out.print(a.getId() + " - " + r.getRank());
 			System.out.println("\t" + a.getTitle());
 			
 			if (++x > MAX_RESULTS) break;

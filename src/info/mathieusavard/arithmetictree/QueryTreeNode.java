@@ -15,6 +15,7 @@ public class QueryTreeNode
     private String element;
     private QueryTreeNode left;
     private QueryTreeNode right;
+	protected static String queryTerms;
     
     public QueryTreeNode(String elem)
     {
@@ -54,6 +55,7 @@ public class QueryTreeNode
         		possibleAnswer = SetOperation.difference(index.getAll(), possibleAnswer);
     		}
     		else {
+    			queryTerms += ((queryTerms.length()==0) ?"":" ") + element;
         		possibleAnswer = (Set<Posting>) index.getSet(element);    			
     		}
     		if (possibleAnswer == null)

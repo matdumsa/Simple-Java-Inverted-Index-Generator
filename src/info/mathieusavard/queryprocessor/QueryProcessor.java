@@ -5,27 +5,31 @@ import info.mathieusavard.arithmetictree.InvalidQueryException;
 import info.mathieusavard.arithmetictree.QueryTree;
 import info.mathieusavard.arithmetictree.QueryTreeBuilder;
 import info.mathieusavard.indexgen.Article;
-import info.mathieusavard.indexgen.ArticleFactory;
+import info.mathieusavard.indexgen.ArticleCollection;
 import info.mathieusavard.indexgen.BenchmarkRow;
 import info.mathieusavard.indexgen.DefaultInvertedIndex;
 import info.mathieusavard.indexgen.Posting;
 import info.mathieusavard.indexgen.TokenizerThread;
 import info.mathieusavard.utils.Property;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class QueryProcessor {
 
-	private static DefaultInvertedIndex postingList = DefaultInvertedIndex.readFromFile("index.txt");
+	private static DefaultInvertedIndex index = DefaultInvertedIndex.readFromFile("index.txt");
 
 	private static Set<Posting> matchingDocId;
-	private static Iterator<Posting> matchedIterator;
+	private static Iterator<Result> matchedIterator;
 	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
+
+	private static String queryPositiveTerms;
 
 	public static long getMatchingTime() {
 		return matchingTime.getDuration();
@@ -35,35 +39,64 @@ public class QueryProcessor {
 		return pullingArticletime.getDuration();
 	}
 
-	public static List<Article> performQuery(String query) throws InvalidQueryException {
-		List<Article> result = new ArrayList<Article>();
-		matchingDocId = findMatchingPostingId(query);
-		if (matchingDocId == null || matchingDocId.isEmpty())
-			return result;
-		else {
-			for (Posting idxid : matchingDocId) {
-				result.add(ArticleFactory.findArticle(idxid.getDocumentId()));
-			}
-			return result;
-		}
-	}
-
 	public static boolean performBufferedQuery(String query) throws InvalidQueryException {
 		matchingDocId = findMatchingPostingId(query);
 		if (matchingDocId == null || matchingDocId.isEmpty() == true)
 			return false;
-		matchedIterator = matchingDocId.iterator();
+		matchedIterator = generateRankResult(queryPositiveTerms, matchingDocId).iterator();
 		return true;
+	}
+
+	private static Collection<Result> generateRankResult(String queryPositiveTerms, Set<Posting> matchingDocument) {
+		if (Property.getBoolean("enable_ranking") == false) {
+			HashSet<Result> resultSet = new HashSet<Result>();
+			for (Posting p : matchingDocument) 
+				resultSet.add(new Result(ArticleCollection.findArticle(p.getDocumentId()), 1));
+			return resultSet;
+		}
+		else {
+			TreeSet<Result> results = new TreeSet<Result>();
+			// Looking to rank each document in regards to query positive terms.
+			for (Posting p : matchingDocument) {
+				results.add(makeRank(ArticleCollection.findArticle(p.getDocumentId()),queryPositiveTerms));
+
+			}
+			return results;
+		}
+	}
+
+	//This methods applies Okapi BM25
+	private static Result makeRank(Article findArticle, String queryPositiveTerms) {
+		double N = ArticleCollection.size();	//corpus size
+		double k1 = 1.5;
+		double b = 0.75;
+		double avgDl = ArticleCollection.getTotalLength()/N;
+		double result =0;
+		for (String term : queryPositiveTerms.split(" ")) {
+			double numberOfDocumentContainingT = index.getSet(term).size();
+			double idfQI = Math.log((N - numberOfDocumentContainingT + 0.5)/(numberOfDocumentContainingT+0.5));
+			double termFrequencyInDocument = 0;
+			// Looking for termFrequencyInDocument
+			for (Posting p : index.getSet(term))
+				if (p.getDocumentId() == findArticle.getId())
+					termFrequencyInDocument = p.getOccurence();
+			
+			double top = termFrequencyInDocument*(k1+1);
+			double bottom = termFrequencyInDocument+k1*(1-b+b*(findArticle.getLengthInWords()/avgDl));
+			result += idfQI*(top/bottom);
+		}
+		return new Result(findArticle, result);
 	}
 
 	public static boolean hasNext() {
 		return matchedIterator.hasNext();
 	}
-	public static Article next() {
+	
+	public static Result next() {
 		pullingArticletime.start();
-		Article a;
+		Result a;
 		if (matchedIterator.hasNext())
-			a = ArticleFactory.findArticle(matchedIterator.next().getDocumentId());
+			a = matchedIterator.next();
 		else
 			a = null;
 		pullingArticletime.stop();
@@ -129,7 +162,8 @@ public class QueryProcessor {
 		System.out.println(compressedQuery);
 		String postfixRepresentation = InToPost.doTrans(compressedQuery);
 		QueryTree qt = QueryTreeBuilder.getTree(postfixRepresentation);
-		Set<Posting> resultSet = qt.getResult(postingList);
+		Set<Posting> resultSet = qt.getResult(index);
+		queryPositiveTerms = qt.getAllMatchedTerms();
 		matchingTime.stop();
 		return resultSet;
 	}

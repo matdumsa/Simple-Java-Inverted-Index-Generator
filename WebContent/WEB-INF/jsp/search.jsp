@@ -21,7 +21,7 @@
 I found <%=request.getAttribute("result-count") %> results in <%= request.getAttribute("time-to-match") %> ms.
 
 	<%while(QueryProcessor.hasNext()) { 
-		Article a = QueryProcessor.next(); if (a==null) continue;%>
+		Article a = QueryProcessor.next().getResult(); if (a==null) continue;%>
 		<h3><a href="document/view/?d=<%=a.getId()%>&q=<%= request.getAttribute("query") %>"><%= a.getTitle() %></a></h3>
 	<% 
 	 	response.flushBuffer();

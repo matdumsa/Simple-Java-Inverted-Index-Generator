@@ -11,9 +11,11 @@ import java.util.TreeMap;
 
 public class ArticleCollection {
 
-	private static TreeMap<Integer, Article> documentMap = new TreeMap<Integer, Article>();
+	private static TreeMap<Integer, Article> documentMap;
 
 	public static synchronized void addArticle(Article a) {
+		if (documentMap == null)
+			documentMap = new TreeMap<Integer, Article>();
 		documentMap.put(a.getId(), a);
 	}
 	
@@ -24,6 +26,7 @@ public class ArticleCollection {
 				Article a = documentMap.get(i);
 				out.write(i + ":" + a.getLengthInWords() + ":" + a.getTitle() + "\n");
 			}
+			out.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -31,17 +34,25 @@ public class ArticleCollection {
 	}
 	
 	public static void readFromFisk() {
+		documentMap = new TreeMap<Integer, Article>();
 		try {
 			LineNumberReader in = new LineNumberReader(new FileReader(Constants.basepath + "/articles.txt"));
 			String line;
 			line = in.readLine();
-			while (line != null) {
-				String[] parts = line.split(":");
-				int id = Integer.parseInt(parts[0]);
-				int length = Integer.parseInt(parts[1]);
-				String title = parts[2].trim();
-				documentMap.put(id, new Article(id, title, length));
-				line = in.readLine();
+			while (line != null && line.length()>0) {
+				try {
+					String[] parts = line.split(":");
+					int id = Integer.parseInt(parts[0]);
+					int length = Integer.parseInt(parts[1]);
+					String title = "???";
+					if (parts.length > 2)
+						title = parts[2].trim();
+					documentMap.put(id, new Article(id, title, length));
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+					line = in.readLine();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -50,10 +61,21 @@ public class ArticleCollection {
 	}
 	
 	public static int getTotalLength() {
+		if (documentMap == null) readFromFisk();
 		int ans=0;
 		for (Article a : documentMap.values()) {
 			ans+=a.getLengthInWords();
 		}
 		return ans;
+	}
+
+	public static Article findArticle(int documentId) {
+		if (documentMap == null) readFromFisk();
+		return documentMap.get(documentId);
+	}
+
+	public static int size() {
+		if (documentMap == null) readFromFisk();
+		return documentMap.size();
 	}
 }
