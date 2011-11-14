@@ -60,7 +60,7 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	}
 
 	@Override
-	public AbstractSet<Integer> getSet(String token) {
+	public AbstractSet<Posting> getSet(String token) {
 		return postingList.getSet(token);
 	}
 
@@ -102,7 +102,7 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	}
 
 	@Override
-	public HashSet<Integer> getAll() {
+	public HashSet<Posting> getAll() {
 		return postingList.getAll();
 	}
 

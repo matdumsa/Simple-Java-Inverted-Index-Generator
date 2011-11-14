@@ -8,6 +8,7 @@ import info.mathieusavard.indexgen.Article;
 import info.mathieusavard.indexgen.ArticleFactory;
 import info.mathieusavard.indexgen.BenchmarkRow;
 import info.mathieusavard.indexgen.DefaultInvertedIndex;
+import info.mathieusavard.indexgen.Posting;
 import info.mathieusavard.indexgen.TokenizerThread;
 
 import java.util.ArrayList;
@@ -20,8 +21,8 @@ public class QueryProcessor {
 
 	private static DefaultInvertedIndex postingList = DefaultInvertedIndex.readFromFile("index.txt");
 
-	private static Set<Integer> matchingDocId;
-	private static Iterator<Integer> matchedIterator;
+	private static Set<Posting> matchingDocId;
+	private static Iterator<Posting> matchedIterator;
 	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
 
@@ -39,8 +40,8 @@ public class QueryProcessor {
 		if (matchingDocId == null || matchingDocId.isEmpty())
 			return result;
 		else {
-			for (int idxid : matchingDocId) {
-				result.add(ArticleFactory.findArticle(idxid));
+			for (Posting idxid : matchingDocId) {
+				result.add(ArticleFactory.findArticle(idxid.getDocumentId()));
 			}
 			return result;
 		}
@@ -61,7 +62,7 @@ public class QueryProcessor {
 		pullingArticletime.start();
 		Article a;
 		if (matchedIterator.hasNext())
-			a = ArticleFactory.findArticle(matchedIterator.next());
+			a = ArticleFactory.findArticle(matchedIterator.next().getDocumentId());
 		else
 			a = null;
 		pullingArticletime.stop();
@@ -115,14 +116,14 @@ public class QueryProcessor {
 		}
 		return compressedQuery;
 	}
-	private static Set<Integer> findMatchingPostingId(String query) throws InvalidQueryException {
+	private static Set<Posting> findMatchingPostingId(String query) throws InvalidQueryException {
 		matchingTime = new BenchmarkRow(null);
 		matchingTime.start();
 		String compressedQuery = compressQuery(query);
 		System.out.println(compressedQuery);
 		String postfixRepresentation = InToPost.doTrans(compressedQuery);
 		QueryTree qt = QueryTreeBuilder.getTree(postfixRepresentation);
-		Set<Integer> resultSet = qt.getResult(postingList);
+		Set<Posting> resultSet = qt.getResult(postingList);
 		matchingTime.stop();
 		return resultSet;
 	}

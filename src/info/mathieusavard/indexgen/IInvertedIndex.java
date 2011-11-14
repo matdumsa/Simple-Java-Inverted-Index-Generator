@@ -13,7 +13,7 @@ public interface IInvertedIndex extends Iterable<String> {
 
 	public abstract int size();
 
-	public abstract AbstractSet<Integer> getSet(String token);
+	public abstract AbstractSet<Posting> getSet(String token);
 
 	public abstract Iterator<String> iterator();
 
@@ -21,6 +21,6 @@ public interface IInvertedIndex extends Iterable<String> {
 
 	public abstract void writeToFile(String path);
 	
-	public abstract HashSet<Integer> getAll();
+	public abstract HashSet<Posting> getAll();
 
 }

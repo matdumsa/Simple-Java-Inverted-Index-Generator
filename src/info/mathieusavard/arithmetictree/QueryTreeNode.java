@@ -4,6 +4,7 @@
 package info.mathieusavard.arithmetictree;
 
 import info.mathieusavard.indexgen.IInvertedIndex;
+import info.mathieusavard.indexgen.Posting;
 import info.mathieusavard.utils.SetOperation;
 
 import java.util.HashSet;
@@ -41,28 +42,28 @@ public class QueryTreeNode
     public QueryTreeNode getRightNode()
     { return right;  }
 
-    public Set<Integer> getResult(IInvertedIndex index)
+    public Set<Posting> getResult(IInvertedIndex index)
     {	//C'est ici que les calculs sont effectués pour un noeud.
     	if (isLeaf()) {
-    		Set<Integer> possibleAnswer = null;
+    		Set<Posting> possibleAnswer = null;
     		if (element.charAt(0) == '-') {
     			element = element.substring(1);
-        		possibleAnswer = (Set<Integer>) index.getSet(element);
+        		possibleAnswer = (Set<Posting>) index.getSet(element);
         		if (possibleAnswer == null)
         			return index.getAll();
         		possibleAnswer = SetOperation.difference(index.getAll(), possibleAnswer);
     		}
     		else {
-        		possibleAnswer = (Set<Integer>) index.getSet(element);    			
+        		possibleAnswer = (Set<Posting>) index.getSet(element);    			
     		}
     		if (possibleAnswer == null)
-    			return new HashSet<Integer>(); //empty set
+    			return new HashSet<Posting>(); //empty set
     		return possibleAnswer;
     	}
 	else {
 			String opcode = element;
-			Set<Integer> operandL = left.getResult(index);
-			Set<Integer> operandR = right.getResult(index);
+			Set<Posting> operandL = left.getResult(index);
+			Set<Posting> operandR = right.getResult(index);
 			if (opcode.equals("+"))
 				return SetOperation.union(operandL, operandR);
 			else if (opcode.equals("-"))

@@ -2,7 +2,6 @@ package info.mathieusavard.indexgen;
 import info.mathieusavard.utils.Property;
 import info.mathieusavard.utils.Utils;
 
-import java.util.HashSet;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
@@ -48,9 +47,6 @@ public class TokenizerThread extends Thread {
 	}
 
 	private void processDocument(String strLine, int docId) {
-		//This will store all the words found
-		HashSet<String> words = new HashSet<String>();
-
 		//Remove all &entities;
 		strLine = Utils.removeEntities(strLine);
 		//Tokenize
@@ -62,16 +58,10 @@ public class TokenizerThread extends Thread {
 			token = tt.compressToken(token);
 
 			//If the token is not empty, add it
-			if (token != null)
-				words.add(token);
-
+			if (token != null) {
+				index.add(token, docId);
+			}
 		} // end of the for all token loop
-
-
-		// For all tokens of this file
-		for (String token : words) {
-			index.add(token, docId);
-		}
 	}
 	
 	public String compressToken(String token) {

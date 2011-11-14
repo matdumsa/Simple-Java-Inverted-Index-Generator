@@ -18,7 +18,7 @@ public class SPIMIReconciliation {
 
 		LineNumberReader[] buffReadArr = new LineNumberReader[totalBlock+1];
 		String[] lastLineRead = new String[totalBlock+1];
-		
+
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(Constants.basepath + "/index.txt"));
 
@@ -31,13 +31,15 @@ public class SPIMIReconciliation {
 			String currentToken = findFirstToken(buffReadArr, lastLineRead);
 			out.write(currentToken);
 			while (currentToken != null) {				
-				HashSet<Integer> postings = writePostingToFile(currentToken, buffReadArr, lastLineRead);
-				for (int i : postings) {
-					out.write(" " + Integer.toString(i, Character.MAX_RADIX));					
+				HashSet<Posting> postings = obtainPostingsForTokenInReaderArray(currentToken, buffReadArr, lastLineRead);
+				for (Posting i : postings) {
+					out.write(" " + i.toString());					
 				}
 				currentToken = findFirstToken(buffReadArr, lastLineRead);
 				out.write("\n" + currentToken);
 			}
+			
+			out.close();
 
 			//Get rid of these files now.
 			for (int i=0; i<=totalBlock; i++) {
@@ -54,8 +56,8 @@ public class SPIMIReconciliation {
 
 	}
 
-	private static HashSet<Integer> writePostingToFile(String currentToken, LineNumberReader[] buffReadArr, String[] lastLineRead) throws IOException {
-		HashSet<Integer> result = new HashSet<Integer>();
+	private static HashSet<Posting> obtainPostingsForTokenInReaderArray(String currentToken, LineNumberReader[] buffReadArr, String[] lastLineRead) throws IOException {
+		HashSet<Posting> result = new HashSet<Posting>();
 		for (int i=0; i<buffReadArr.length; i++ ) {
 			String line = lastLineRead[i];
 			if (line == null)
@@ -72,7 +74,13 @@ public class SPIMIReconciliation {
 						skip=false;
 						continue;
 					}
-					result.add(Integer.parseInt(s, Character.MAX_RADIX));
+					Posting p = Posting.fromString(s);
+					if (result.add(p) == false)
+						for (Posting p2 : result)
+						{
+							if (p.equals(p2))
+								p2.add(p.getOccurence());
+						}
 				}
 			}
 		}

@@ -4,6 +4,7 @@
 package info.mathieusavard.arithmetictree;
 
 import info.mathieusavard.indexgen.IInvertedIndex;
+import info.mathieusavard.indexgen.Posting;
 
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class QueryTree
     	return root;
     }
 
-    public Set<Integer> getResult(IInvertedIndex index)
+    public Set<Posting> getResult(IInvertedIndex index)
     {	
     	return root.getResult(index);
     }
