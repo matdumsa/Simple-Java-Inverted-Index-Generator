@@ -4,7 +4,6 @@ import info.mathieusavard.technicalservices.BenchmarkRow;
 import info.mathieusavard.technicalservices.Constants;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -24,9 +22,9 @@ import java.util.TreeMap;
 
 public class DefaultInvertedIndex implements IInvertedIndex {
 
-	private AbstractMap<String, List<Posting>> map = new TreeMap<String, List<Posting>>();
+	private AbstractMap<String, ArrayList<Posting>> map = new TreeMap<String, ArrayList<Posting>>();
 	
-	boolean add(String token, List<Posting> documentList) {
+	boolean add(String token, ArrayList<Posting> documentList) {
 		if (token == null ) return false;
 		if (map.containsKey(token)) {
 			//add this document to the list of document that contains this token
@@ -39,7 +37,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	
 	}
 	
-	private List<Posting> mergeTwoPostingList(List<Posting> a, List<Posting> b) {
+	private ArrayList<Posting> mergeTwoPostingList(ArrayList<Posting> a, ArrayList<Posting> b) {
 		for (Posting p1:a) {
 			int idxInB = b.indexOf(p1);
 			if (idxInB == -1)
@@ -119,18 +117,19 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	@Override
 	public synchronized void writeToFile(String path) {
 		try {
+			StringBuilder sb = new StringBuilder();
 			FileWriter fstream = new FileWriter(Constants.basepath + "/" + path);
-			BufferedWriter out = new BufferedWriter(fstream);
 			// For each token of the index
 			for (String token : this) {
 				// Write to the index file
-				out.write(token + " ");
+				sb.append(token + " ");
 				for (Posting i : this.getSet(token))
-					out.write(i.toString() + " ");
-				out.write("\n");
+					sb.append(i.toString() + " ");
+				sb.append("\n");
 			}
+			fstream.write(sb.toString());
 			// Close the index file.
-			out.close();
+			fstream.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -140,7 +139,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	
 	public static DefaultInvertedIndex readFromFile(String path) {
 		try {
-			TreeMap<String, List<Posting>> newMap = new TreeMap<String, List<Posting>>();
+			TreeMap<String, ArrayList<Posting>> newMap = new TreeMap<String, ArrayList<Posting>>();
 
 			File inputFile = new File(Constants.basepath + "/" + path);
 			BenchmarkRow timer = new BenchmarkRow(null);
@@ -167,7 +166,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 					}
 				}
 				
-				newMap.put(term, new LinkedList<Posting>(Arrays.asList((postingList))));
+				newMap.put(term, new ArrayList<Posting>(Arrays.asList((postingList))));
 				line = in.readLine();
 			}
 
