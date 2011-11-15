@@ -38,15 +38,18 @@ public class Result implements Comparable<Result> {
 	 * USed for insertion in a sorted array.. the better the result the first you are
 	 */
 	public int compareTo(Result other) {
+		if (other.rank == this.rank)
+			return  new Integer(this.result.getId()).compareTo(other.getResult().getId());
 		return Double.compare(other.rank,this.rank);
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Result))
 			return false;
 		return (((Result) o).getResult().getId() == getResult().getId());
 	}
+	
 	public void addPosting(Posting posting) {
 		if (matchesFor == null)
 			matchesFor = new HashSet<Posting>();

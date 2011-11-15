@@ -57,9 +57,11 @@ public class QueryProcessor {
 			TreeSet<Result> results = new TreeSet<Result>();
 			// Looking to rank each document in regards to query positive terms.
 			for (Posting p : matchingDocument) {
-				results.add(makeRank(Corpus.findArticle(p.getDocumentId()),queryPositiveTerms));
+				Result result = makeRank(Corpus.findArticle(p.getDocumentId()),queryPositiveTerms);
+				results.add(result);
 
 			}
+			System.out.println("Done ranking " +matchingDocument.size() +":"+ results.size() + " results");
 			return results;
 		}
 	}

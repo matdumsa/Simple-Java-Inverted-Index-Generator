@@ -56,7 +56,6 @@ public class InteractiveQuery {
 			return;
 		}
 
-		int x = 0;
 		System.out.println("I found " + QueryProcessor.size() + " results in " + QueryProcessor.getMatchingTime()/1000.0 + "seconds");
 		if (QueryProcessor.size() > MAX_RESULTS)
 			System.out.println("showing the first " + MAX_RESULTS + " results");
@@ -66,8 +65,6 @@ public class InteractiveQuery {
 			Document a = r.getResult();
 			System.out.print(a.getId() + " - " + r.getRank());
 			System.out.println("\t" + a.getTitle());
-			
-			if (++x > MAX_RESULTS) break;
 		}
 
 		System.out.println("Done, I took " + QueryProcessor.getPullingTime()/1000.0 + "seconds pulling all the articles");
