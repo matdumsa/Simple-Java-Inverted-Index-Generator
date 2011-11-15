@@ -1,6 +1,5 @@
 package info.mathieusavard.domain;
 
-import java.util.StringTokenizer;
 
 
 public class Document {
@@ -41,12 +40,12 @@ public class Document {
 	
 	private int length = -1;
 	public int getLengthInWords() {
-		if (length>=0) return length;
-		StringTokenizer st = new StringTokenizer(getText());
-		length=st.countTokens();
 		return length;
 	}
-	
+
+	public void setLengthInWords(int length) {
+		this.length = length;
+	}
 	/**
 	 * Should be called in a crawler when you want to keep only the 
 	 */

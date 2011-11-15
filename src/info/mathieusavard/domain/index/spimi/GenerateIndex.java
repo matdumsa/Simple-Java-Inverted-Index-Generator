@@ -1,5 +1,4 @@
 package info.mathieusavard.domain.index.spimi;
-import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.index.ParsableArticleCollection;
 import info.mathieusavard.domain.index.TokenizerThread;
 import info.mathieusavard.domain.index.XMLSharding;
@@ -81,11 +80,9 @@ public class GenerateIndex {
 		benchmark.stopTimer("writing-to-file");
 
 		benchmark.stopTimer("total");
-
-		int size = DefaultInvertedIndex.readFromFile("index.txt").size();
 		
 		// Display some statistics
-		System.out.println("The inverted index has been generated with " + size + " tokens");
+		System.out.println("The inverted index has been generated");
 		
 		benchmark.reportOnAllTimer();
 	}

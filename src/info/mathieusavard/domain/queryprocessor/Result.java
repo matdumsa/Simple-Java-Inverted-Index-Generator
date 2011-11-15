@@ -1,9 +1,9 @@
 package info.mathieusavard.domain.queryprocessor;
 
-import java.util.HashSet;
-
 import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.Posting;
+
+import java.util.HashSet;
 
 public class Result implements Comparable<Result> {
 

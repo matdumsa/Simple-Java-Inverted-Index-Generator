@@ -3,7 +3,6 @@ package info.mathieusavard.domain.index.spimi;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.technicalservices.Property;
 
-import java.io.File;
 import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Iterator;

@@ -73,11 +73,8 @@ public class TokenizerThread extends Thread {
 
 		Document d = popOrWait();
 		while (d != null) {
-			int id = d.getId();
-			String s = d.getText();
-			processDocument(s, id);
+			processDocument(d);
 			Corpus.addArticle(d);
-			d.getLengthInWords();
 			d.clearContent();
 			if (acceptNewDocument == false) {
 				if (filesToProcess.size()>0)
@@ -96,22 +93,24 @@ public class TokenizerThread extends Thread {
 
 	}
 
-	private void processDocument(String text, int docId) {
+	private void processDocument(Document d) {
 		//Remove all &entities;
-		text = Utils.removeEntities(text);
+		String text = Utils.removeEntities(d.getText());
 		//Tokenize
 		StringTokenizer st = new StringTokenizer(text);
-		TokenizerThread tt = new TokenizerThread();
+		int wordCount =0 ;
 		while (st.hasMoreTokens()) {
+			wordCount++;
 			//Read the next token, put to lowercase
 			String token = st.nextToken();
-			token = tt.compressToken(token);
+			token = compressToken(token);
 
 			//If the token is not empty, add it
 			if (token != null) {
-				index.add(token, docId);
+				index.add(token, d.getId());
 			}
 		} // end of the for all token loop
+		d.setLengthInWords(wordCount);
 	}
 
 	public String compressToken(String token) {
