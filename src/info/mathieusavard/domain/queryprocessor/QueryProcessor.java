@@ -3,7 +3,7 @@ package info.mathieusavard.domain.queryprocessor;
 import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.Posting;
-import info.mathieusavard.domain.index.TokenizerThread;
+import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.domain.queryprocessor.booleantree.InfixToPostfix;
 import info.mathieusavard.domain.queryprocessor.booleantree.InvalidQueryException;
@@ -142,7 +142,7 @@ public class QueryProcessor {
 			//Setting the default boolean operator between words to AND
 			query = query.replace(" ", "^");
 
-		TokenizerThread tt = new TokenizerThread();
+		IndexerThread tt = new IndexerThread("Query compressor");
 		StringTokenizer st = new StringTokenizer(query,"^-+()", true);
 		String compressedQuery = "";
 		while (st.hasMoreTokens()) {	

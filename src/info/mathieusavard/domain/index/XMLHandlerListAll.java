@@ -3,33 +3,26 @@ package info.mathieusavard.domain.index;
 import info.mathieusavard.domain.Document;
 import info.mathieusavard.technicalservices.HtmlEntities;
 
-import java.util.ArrayList;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLHandlerListAll extends DefaultHandler {
-
-
-	
-	ArrayList<Document> al = new ArrayList<Document>();
-
 	boolean isText = false;
 	boolean isTitle = false;
 	boolean isBody = true;
-	
+
 	private int id;
-	private String text = "";
-	private String title = "";
-		
+	private StringBuilder title;
+	private StringBuilder text;
+
 	public void startElement(String uri, String localName,String qName, 
 			Attributes attributes) throws SAXException {
 
 		if (qName.equals("REUTERS")) {
-				id = Integer.parseInt(attributes.getValue("NEWID"));
-				text = "";
-				title="";
+			id = Integer.parseInt(attributes.getValue("NEWID"));
+			text = new StringBuilder();
+			title = new StringBuilder();
 		}
 
 		if (qName.equals("TEXT")) {
@@ -44,40 +37,29 @@ public class XMLHandlerListAll extends DefaultHandler {
 	}
 
 	public void characters(char ch[], int start, int length) throws SAXException {
-			
+
 		if (isText && isTitle) {
-			title += new String(ch, start, length);
+			title.append(ch, start, length);
 		}
 		if (isText) {
-			text += new String(ch, start, length);
+			text.append(ch, start, length);
 		}
-		
+
 	}
-	
+
 	public void endElement(String uri, String localName,
 			String qName) throws SAXException {
-		
 		if (qName.equals("TEXT")) {
 			isText=false;
-			al.add(new Document(id, HtmlEntities.encode(title), HtmlEntities.encode(text)));
-			title="";
-			id=0;
-			text="";
+			Document d = new Document(id, HtmlEntities.encode(title.toString()), HtmlEntities.encode(text.toString()));
+			IndexerThread.addDocument(d);
 		}
 		if (qName.equals("TITLE"))
 			isTitle=false;
 		if (qName.equals("BODY") ) {
 			isBody=false;
 		}
-	
-		}
-	
-	public ArrayList<Document> getResult() {
-		return al;
 	}
-	 
-
-
 
 }
 

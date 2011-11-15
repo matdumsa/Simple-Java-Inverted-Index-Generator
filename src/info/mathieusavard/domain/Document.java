@@ -1,5 +1,7 @@
 package info.mathieusavard.domain;
 
+import info.mathieusavard.domain.index.DiskReaderThread;
+
 
 
 public class Document {
@@ -29,7 +31,7 @@ public class Document {
 	public String getText() {
 		if (text != null) return text;
 		//Make article act as a proxy here
-		return DocumentFactory.findArticle(getId()).getText();
+		return DiskReaderThread.getArticleById(getId()).getText();
 	}
 	
 	public String getTitle() {

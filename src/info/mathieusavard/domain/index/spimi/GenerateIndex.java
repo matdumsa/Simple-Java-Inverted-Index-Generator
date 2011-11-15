@@ -1,6 +1,6 @@
 package info.mathieusavard.domain.index.spimi;
-import info.mathieusavard.domain.index.ParsableArticleCollection;
-import info.mathieusavard.domain.index.TokenizerThread;
+import info.mathieusavard.domain.index.DiskReaderThread;
+import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.domain.index.XMLSharding;
 import info.mathieusavard.technicalservices.Benchmark;
 import info.mathieusavard.technicalservices.Constants;
@@ -8,12 +8,11 @@ import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 
 public class GenerateIndex {
 
-	private static final int NUMBER_OF_WORKER_THREADS = Property.getInt("numOfThreads");
+	private static final int NUMBER_OF_INDEXER_THREADS = Property.getInt("numOfThreads");
 	private static final String DEFAULT_DIR = Constants.basepath + "/reut";
 	private static final String DEFAULT_EXTENSION = ".xml";
 
@@ -26,38 +25,42 @@ public class GenerateIndex {
 		String extension = (args.length > 1) ? args[1] : DEFAULT_EXTENSION;
 		
 		//Open all files
-		ArrayList<TokenizerThread> pool = new ArrayList<TokenizerThread>();
-		Stack<ParsableArticleCollection> documentCollection = new Stack<ParsableArticleCollection>();
+		ArrayList<IndexerThread> pool = new ArrayList<IndexerThread>();
 
 		if (Property.getBoolean("forceSharding"))
 			XMLSharding.preprocess(directory, directory + "/fragment");
 
-		for (String documentName : Utils.getAllFiles(directory, extension, false)) {
-				ParsableArticleCollection d = new ParsableArticleCollection(documentName);
-				documentCollection.push(d);
-		} // end of the for all files loop
+		DiskReaderThread.addCollection(Utils.getAllFiles(directory, extension, false));
 
-		final int DOC_PER_THREAD = documentCollection.size() / NUMBER_OF_WORKER_THREADS;
-
+		//Launch two disk reader thread!
+		DiskReaderThread d1 = new DiskReaderThread();
+		DiskReaderThread d2 = new DiskReaderThread();
+		d1.start();
+		d2.start();
+		
 		benchmark.startTimer("starting-thread");
-		for (int x=0; x<NUMBER_OF_WORKER_THREADS; x++) {
-			String tName = "Worker-" + x;
-
-			Stack<ParsableArticleCollection> subDocList = new Stack<ParsableArticleCollection>();
-			for (int y=0; y<=DOC_PER_THREAD && documentCollection.isEmpty() == false; y++) {
-				subDocList.push(documentCollection.pop());
-			}
-
-			TokenizerThread t1 = new TokenizerThread(tName, subDocList);
+		for (int x=0; x<NUMBER_OF_INDEXER_THREADS; x++) {
+			String tName = "Indexer-" + x;
+			IndexerThread t1 = new IndexerThread(tName);
 			t1.start();
 			pool.add(t1);
 		}
 		
-		documentCollection = null;
 		benchmark.stopTimer("starting-thread");
 		
+		//Now IO has to finish
+		try {
+			d1.join();
+			d2.join();
+			System.out.println("Done reading files from disk");
+			IndexerThread.signalNoMoreDocumentsAreExpected();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
-		for (TokenizerThread t : pool) {
+
+		for (IndexerThread t : pool) {
 			try {
 				benchmark.startTimer("waiting-thread");
 				benchmark.startTimer("waiting-thread" + t.getName());
@@ -80,6 +83,7 @@ public class GenerateIndex {
 		benchmark.stopTimer("writing-to-file");
 
 		benchmark.stopTimer("total");
+
 		
 		// Display some statistics
 		System.out.println("The inverted index has been generated");

@@ -4,7 +4,6 @@ import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
 import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
-import info.mathieusavard.domain.index.spimi.SPIMIReconciliation;
 import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 
@@ -12,7 +11,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 
 
-public class TokenizerThread extends Thread {
+public class IndexerThread extends Thread {
 
 	//DICTIONARY COMPRESSION OPTION
 	private static final boolean COMPRESSION_NO_NUMBER=Property.getBoolean("COMPRESSION_NO_NUMBER");
@@ -23,50 +22,29 @@ public class TokenizerThread extends Thread {
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
-	private Stack<Document> filesToProcess;
+	private static Stack<Document> filesToProcess = new Stack<Document>();
 	//When set to true, the thread will sleep waiting for new document to index
-	private boolean acceptNewDocument = false;
+	private static boolean noMoreDocumentsWillBeAdded = false;
 
-	//When set to true, the thread will stop waiting for new document and return once it wakes up
-	private boolean terminate = false;
 
-	public TokenizerThread(String tName, Stack<ParsableArticleCollection> filesToProcess) {
-		this.filesToProcess = new Stack<Document>();
-		for (ParsableArticleCollection c : filesToProcess) {
-			this.filesToProcess.addAll(c.getArticles());
-		}
-	}
-
-	public TokenizerThread(String tName) {
-		this.filesToProcess = null;
-		acceptNewDocument = true;
-		filesToProcess = new Stack<Document>();
-	}
-
-	public TokenizerThread() {
-
+	public IndexerThread(String tName) {
+		super(tName);
 	}
 
 	public Document popOrWait() {
-		Document d = null;
-		while (d==null) {
+		try {
 			synchronized(filesToProcess) {
-				try {
-					d = filesToProcess.pop();
-				} catch (Exception e) {
-					try {
-						if (this.terminate==true)
-							return null;
-						filesToProcess.wait();
-						if (this.terminate==true)
-							return null;
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
+				if (filesToProcess.size() == 0) {
+					if (noMoreDocumentsWillBeAdded == true)
+						return null;
+					filesToProcess.wait();
+					return popOrWait();
 				}
+				return filesToProcess.pop();
 			}
+		} catch (InterruptedException e) {
+			return null;
 		}
-		return d;
 	}
 	public void run() {
 		index = new SPIMIInvertedIndex();
@@ -76,21 +54,15 @@ public class TokenizerThread extends Thread {
 			processDocument(d);
 			Corpus.addArticle(d);
 			d.clearContent();
-			if (acceptNewDocument == false) {
-				if (filesToProcess.size()>0)
-					d = filesToProcess.pop();
-				else
-					d=null;
-			}
-			else {
-				d = popOrWait();
-			}
+			d = popOrWait();
 		}
 
 		index.writeToFile(""); // flush the last spimi shard
-		if (acceptNewDocument == true && terminate == true)
-			SPIMIReconciliation.reconciliate();
 
+		synchronized(filesToProcess) {
+			System.out.println(super.getName() + " says: I'm done working, deallocate.");
+			filesToProcess.notifyAll(); //ÊTelling others it's fine to stop..			
+		}
 	}
 
 	private void processDocument(Document d) {
@@ -137,17 +109,15 @@ public class TokenizerThread extends Thread {
 		return token;
 	}
 
-	public void stopThread() {
-		this.terminate=true;
+	public static void signalNoMoreDocumentsAreExpected() {
+		noMoreDocumentsWillBeAdded=true;
 		synchronized(filesToProcess) {
 			filesToProcess.notify();
 		}
-		System.out.println("Starting reconciliation");
-
 	}
 
-	public void addDocument(Document d) {
-		if (this.acceptNewDocument == false)
+	public static void addDocument(Document d) {
+		if (noMoreDocumentsWillBeAdded == true)
 			throw new RuntimeException("You cannot add document is this tokenizer thread is not expecting them");
 		synchronized(filesToProcess) {
 			filesToProcess.push(d);
