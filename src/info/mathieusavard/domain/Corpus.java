@@ -7,12 +7,25 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.TreeMap;
 
 public class Corpus {
 
 	private static TreeMap<Integer, GenericDocument> documentMap;
+	private static Class<? extends GenericDocument> factory = GenericDocument.class;
 
+
+	/**
+	 * When using a document type that extends from GenericDocument, the factory (class that contains fromString) that can
+	 * create this type of document should be passed here.
+	 * @param factory
+	 */
+	public static void setNewDocumentFactory(Class<? extends GenericDocument> factory) {
+		Corpus.factory = factory;
+	}
+	
 	public static synchronized void addArticle(GenericDocument d) {
 		if (documentMap == null)
 			documentMap = new TreeMap<Integer, GenericDocument>();
@@ -41,9 +54,25 @@ public class Corpus {
 			line = in.readLine();
 			while (line != null && line.length()>0) {
 				try {
-					GenericDocument d = GenericDocument.fromString(line);
+					Method factoryMethod = factory.getDeclaredMethod("fromString", String.class);
+					GenericDocument d = (GenericDocument) factoryMethod.invoke(null, line);
 					documentMap.put(d.getId(), d);
 				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
