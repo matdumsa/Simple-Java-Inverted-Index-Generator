@@ -39,7 +39,7 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	public boolean add(String token, int id) {
 		if (currentSize >= MEMORY_SIZE) {
 			flushBlock();
-			acquireNewBlock();
+			currentBlockNumber = acquireNewBlock();
 		}
 		
 		//If the defaultPostingList tells me this is a new term/doc I increment size
