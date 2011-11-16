@@ -1,6 +1,6 @@
 package info.mathieusavard.application.console;
 
-import info.mathieusavard.domain.Document;
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.index.spimi.GenerateIndex;
 import info.mathieusavard.domain.queryprocessor.QueryProcessor;
 import info.mathieusavard.domain.queryprocessor.Result;
@@ -62,7 +62,7 @@ public class InteractiveQuery {
 			
 		while (QueryProcessor.hasNext()) {
 			Result r =  QueryProcessor.next();
-			Document a = r.getResult();
+			GenericDocument a = r.getResult();
 			System.out.print(a.getId() + " - " + r.getRank());
 			System.out.println("\t" + a.getTitle());
 		}

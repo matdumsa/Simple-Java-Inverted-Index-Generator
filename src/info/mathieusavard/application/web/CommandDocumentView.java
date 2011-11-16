@@ -1,7 +1,7 @@
 package info.mathieusavard.application.web;
 
-import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.index.DiskReaderThread;
+import info.mathieusavard.domain.reuters.ReutersDocument;
 import info.mathieusavard.technicalservices.BenchmarkRow;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class CommandDocumentView extends Command {
 		int documentId = Integer.parseInt(sDocumentId);
 		BenchmarkRow timer = new BenchmarkRow(null);
 		timer.start();
-		Document a = DiskReaderThread.getArticleById(documentId);
+		ReutersDocument a = DiskReaderThread.getArticleById(documentId);
 		timer.stop();
 		request.setAttribute("article", a);
 		request.setAttribute("pull-time", timer.getDuration());

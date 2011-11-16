@@ -1,11 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import="info.mathieusavard.domain.Document,info.mathieusavard.technicalservices.BenchmarkRow"%>
+    pageEncoding="ISO-8859-1" import="info.mathieusavard.domain.reuters.ReutersDocument,info.mathieusavard.technicalservices.BenchmarkRow"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <%
-	Document a = (Document) request.getAttribute("article");
+	ReutersDocument a = (ReutersDocument) request.getAttribute("article");
 %>
 <title><%=a.getTitle() %></title>
 <style>

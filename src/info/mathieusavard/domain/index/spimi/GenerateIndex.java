@@ -1,7 +1,7 @@
 package info.mathieusavard.domain.index.spimi;
 import info.mathieusavard.domain.index.DiskReaderThread;
 import info.mathieusavard.domain.index.IndexerThread;
-import info.mathieusavard.domain.index.XMLSharding;
+import info.mathieusavard.domain.reuters.XMLSharding;
 import info.mathieusavard.technicalservices.Benchmark;
 import info.mathieusavard.technicalservices.Constants;
 import info.mathieusavard.technicalservices.Property;

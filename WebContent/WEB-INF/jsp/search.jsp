@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import="info.mathieusavard.domain.Document,java.util.List,info.mathieusavard.domain.queryprocessor.QueryProcessor,info.mathieusavard.technicalservices.BenchmarkRow"%>
+    pageEncoding="ISO-8859-1" import="info.mathieusavard.domain.reuters.ReutersDocument,java.util.List,info.mathieusavard.domain.queryprocessor.QueryProcessor,info.mathieusavard.technicalservices.BenchmarkRow"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -24,7 +24,7 @@ I found <%=request.getAttribute("result-count")%> results in <%=request.getAttri
 
 	<%
 		while(QueryProcessor.hasNext()) { 
-			Document a = QueryProcessor.next().getResult(); if (a==null) continue;
+		ReutersDocument a = QueryProcessor.next().getResult(); if (a==null) continue;
 	%>
 		<h3><a href="document/view/?d=<%=a.getId()%>&q=<%= request.getAttribute("query") %>"><%= a.getTitle() %></a></h3>
 	<% 

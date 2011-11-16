@@ -1,7 +1,7 @@
 package info.mathieusavard.domain.queryprocessor;
 
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Corpus;
-import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
@@ -67,7 +67,7 @@ public class QueryProcessor {
 	}
 
 	//This methods applies Okapi BM25
-	private static Result makeRank(Document findArticle, String queryPositiveTerms) {
+	private static Result makeRank(GenericDocument abstractDocument, String queryPositiveTerms) {
 		double N = Corpus.size();	//corpus size
 		double k1 = 1.5;
 		double b = 0.75;
@@ -79,14 +79,14 @@ public class QueryProcessor {
 			double termFrequencyInDocument = 0;
 			// Looking for termFrequencyInDocument
 			for (Posting p : index.getSet(term))
-				if (p.getDocumentId() == findArticle.getId())
+				if (p.getDocumentId() == abstractDocument.getId())
 					termFrequencyInDocument = p.getOccurence();
 			
 			double top = termFrequencyInDocument*(k1+1);
-			double bottom = termFrequencyInDocument+k1*(1-b+b*(findArticle.getLengthInWords()/avgDl));
+			double bottom = termFrequencyInDocument+k1*(1-b+b*(abstractDocument.getLengthInWords()/avgDl));
 			result += idfQI*(top/bottom);
 		}
-		return new Result(findArticle, result);
+		return new Result(abstractDocument, result);
 	}
 
 	public static boolean hasNext() {

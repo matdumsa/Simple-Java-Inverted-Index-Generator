@@ -1,6 +1,6 @@
-package info.mathieusavard.domain.index;
+package info.mathieusavard.domain.reuters;
 
-import info.mathieusavard.domain.Document;
+import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.technicalservices.HtmlEntities;
 
 import org.xml.sax.Attributes;
@@ -51,7 +51,7 @@ public class XMLHandlerListAll extends DefaultHandler {
 			String qName) throws SAXException {
 		if (qName.equals("TEXT")) {
 			isText=false;
-			Document d = new Document(id, HtmlEntities.encode(title.toString()), HtmlEntities.encode(text.toString()));
+			ReutersDocument d = new ReutersDocument(id, HtmlEntities.encode(title.toString()), HtmlEntities.encode(text.toString()));
 			IndexerThread.addDocument(d);
 		}
 		if (qName.equals("TITLE"))

@@ -1,23 +1,23 @@
 package info.mathieusavard.domain.queryprocessor;
 
-import info.mathieusavard.domain.Document;
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
 
 import java.util.HashSet;
 
 public class Result implements Comparable<Result> {
 
-	private Document result;
+	private GenericDocument result;
 	private double rank;
 	private HashSet<Posting> matchesFor;
 	
-	public Result(Document result, double rank) {
+	public Result(GenericDocument result, double rank) {
 		super();
 		this.result = result;
 		this.rank = rank;
 	}
 
-	public Result(Document result, double rank, Posting p) {
+	public Result(GenericDocument result, double rank, Posting p) {
 		super();
 		this.result = result;
 		this.rank = rank;
@@ -25,7 +25,7 @@ public class Result implements Comparable<Result> {
 		matchesFor.add(p);
 	}
 
-	public Document getResult() {
+	public GenericDocument getResult() {
 		return result;
 	}
 	public double getRank() {

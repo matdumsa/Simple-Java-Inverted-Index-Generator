@@ -1,4 +1,4 @@
-package info.mathieusavard.domain.index;
+package info.mathieusavard.domain.reuters;
 
 import info.mathieusavard.technicalservices.Utils;
 

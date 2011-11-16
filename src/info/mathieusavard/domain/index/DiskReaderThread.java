@@ -1,6 +1,8 @@
 package info.mathieusavard.domain.index;
 
-import info.mathieusavard.domain.Document;
+import info.mathieusavard.domain.reuters.ReutersDocument;
+import info.mathieusavard.domain.reuters.XMLHandlerListAll;
+import info.mathieusavard.domain.reuters.XMlHandlerFindById;
 import info.mathieusavard.technicalservices.Constants;
 
 import java.io.IOException;
@@ -71,7 +73,7 @@ public class DiskReaderThread extends Thread {
 
 	}
 
-	public static Document getArticleById(int id) {
+	public static ReutersDocument getArticleById(int id) {
 		int collection = id/1000;
 		String path = Constants.basepath + "/reut/" + collection + "/" + id + ".xml";
 		XMlHandlerFindById h = new XMlHandlerFindById(id);

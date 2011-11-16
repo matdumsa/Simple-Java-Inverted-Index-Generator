@@ -1,6 +1,5 @@
-package info.mathieusavard.domain.index;
+package info.mathieusavard.domain.reuters;
 
-import info.mathieusavard.domain.Document;
 import info.mathieusavard.technicalservices.HtmlEntities;
 
 import org.xml.sax.Attributes;
@@ -8,8 +7,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class XMlHandlerFindById extends DefaultHandler {
-
-
 
 
 	boolean isText = false;
@@ -20,7 +17,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 	private String text = "";
 	private String title = "";
 	private boolean found = false;
-	private Document a;
+	private ReutersDocument a;
 
 	public XMlHandlerFindById(int id) {
 		this.id = id;
@@ -63,7 +60,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 			String qName) throws SAXException {
 		if (qName.equals("TEXT") && found) {
 			isText=false;			
-			a = new Document(id, HtmlEntities.encode(title), HtmlEntities.encode(text));
+			a = new ReutersDocument(id, HtmlEntities.encode(title), HtmlEntities.encode(text));
 			throw new SAXException("done");	
 		}
 		if (qName.equals("TITLE") && found)
@@ -74,7 +71,7 @@ public class XMlHandlerFindById extends DefaultHandler {
 
 	}
 
-	public Document getResult() {
+	public ReutersDocument getResult() {
 		return a;
 	}
 

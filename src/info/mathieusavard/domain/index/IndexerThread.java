@@ -1,9 +1,9 @@
 package info.mathieusavard.domain.index;
 import info.mathieusavard.domain.Corpus;
-import info.mathieusavard.domain.Document;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
 import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 
@@ -22,16 +22,15 @@ public class IndexerThread extends Thread {
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
-	private static Stack<Document> filesToProcess = new Stack<Document>();
+	private static Stack<GenericDocument> filesToProcess = new Stack<GenericDocument>();
 	//When set to true, the thread will sleep waiting for new document to index
 	private static boolean noMoreDocumentsWillBeAdded = false;
-
 
 	public IndexerThread(String tName) {
 		super(tName);
 	}
 
-	public Document popOrWait() {
+	public GenericDocument popOrWait() {
 		try {
 			synchronized(filesToProcess) {
 				if (filesToProcess.size() == 0) {
@@ -49,7 +48,7 @@ public class IndexerThread extends Thread {
 	public void run() {
 		index = new SPIMIInvertedIndex();
 
-		Document d = popOrWait();
+		GenericDocument d = popOrWait();
 		while (d != null) {
 			processDocument(d);
 			Corpus.addArticle(d);
@@ -65,7 +64,7 @@ public class IndexerThread extends Thread {
 		}
 	}
 
-	private void processDocument(Document d) {
+	private void processDocument(GenericDocument d) {
 		//Remove all &entities;
 		String text = Utils.removeEntities(d.getText());
 		//Tokenize
@@ -116,7 +115,7 @@ public class IndexerThread extends Thread {
 		}
 	}
 
-	public static void addDocument(Document d) {
+	public static void addDocument(GenericDocument d) {
 		if (noMoreDocumentsWillBeAdded == true)
 			throw new RuntimeException("You cannot add document is this tokenizer thread is not expecting them");
 		synchronized(filesToProcess) {
