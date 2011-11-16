@@ -33,6 +33,8 @@ public class InteractiveQuery {
 			if (query.equals("index")) {
 				GenerateIndex.main(new String[] {});
 			}
+			else if (query.equals("getDocumentBasedIndex"))
+				QueryProcessor.getIndex().getDocumentBasedIndex();
 			else if (!(query.equals("quit"))){
 				performQuery(query);
 			}

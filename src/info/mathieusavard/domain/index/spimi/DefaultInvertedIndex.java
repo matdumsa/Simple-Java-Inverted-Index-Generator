@@ -1,4 +1,6 @@
 package info.mathieusavard.domain.index.spimi;
+import info.mathieusavard.domain.Corpus;
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.technicalservices.BenchmarkRow;
 import info.mathieusavard.technicalservices.Constants;
@@ -12,8 +14,10 @@ import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -52,13 +56,13 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		// If this token is already in our index
 		if (map.containsKey(token)) {
 			//add this document to the list of document that contains this token
-			int idx = map.get(token).indexOf(new Posting(documentNumber,-1));
+			int idx = map.get(token).indexOf(new Posting(token, documentNumber,-1));
 			if (idx >-1) {
 				map.get(token).get(idx).add(1);
 				return false;
 			}
 			else {
-				map.get(token).add(new Posting(documentNumber,1)); // if this is a new document/token pair
+				map.get(token).add(new Posting(token, documentNumber,1)); // if this is a new document/token pair
 				return true;
 			}
 		}
@@ -66,7 +70,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			// Not already present, create a new list of document name
 			ArrayList<Posting> documentList = new ArrayList<Posting>();
 			// Add this document to the list
-			documentList.add(new Posting(documentNumber,1));
+			documentList.add(new Posting(token, documentNumber,1));
 			// Add this list of document to the index
 			map.put(token, documentList);
 			return true;
@@ -162,7 +166,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 						term = st.nextToken();
 					}
 					else {
-						postingList[i++] = Posting.fromString(st.nextToken());
+						postingList[i++] = Posting.fromString(term, st.nextToken());
 					}
 				}
 				
@@ -193,5 +197,30 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			all.addAll(map.get(s));
 		}
 		return all;
+	}
+	
+	/*
+	 * Used for tf-idf
+	 */
+	public TreeMap<GenericDocument, LinkedList<Posting>> getDocumentBasedIndex() {
+		TreeMap<GenericDocument, LinkedList<Posting>> result = new TreeMap<GenericDocument, LinkedList<Posting>>();
+		
+		BenchmarkRow br = new BenchmarkRow("Document based index");
+		br.start();
+		for (Collection<Posting> collection : map.values()) {
+			for (Posting p : collection) {
+				GenericDocument doc = Corpus.findArticle(p.getDocumentId());
+				if (result.containsKey(doc))
+					result.get(doc).add(p);
+				else {
+					LinkedList<Posting> ll = new LinkedList<Posting>();
+					ll.add(p);
+					result.put(doc, ll);
+				}
+			}
+		}
+		br.stop();
+		System.out.println("Document based index took " + br.getDuration() + " to run");
+		return result;
 	}
 }

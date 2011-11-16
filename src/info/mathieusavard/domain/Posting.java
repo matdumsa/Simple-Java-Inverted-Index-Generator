@@ -4,11 +4,13 @@ public class Posting implements Comparable<Posting> {
 
 	private int documentId;
 	private int occurence;
-
-	public Posting(int documentId, int occurence) {
+	private String term;
+	
+	public Posting(String term, int documentId, int occurence) {
 		super();
 		this.documentId = documentId;
 		this.occurence = occurence;
+		this.term = term;
 	}
 
 	public int getDocumentId() {
@@ -47,11 +49,11 @@ public class Posting implements Comparable<Posting> {
 	}
 	
 	
-	public static Posting fromString(String input) {
+	public static Posting fromString(String term, String input) {
 		String[] parts =input.split(":");
 		int documentId = Integer.parseInt(parts[0], Character.MAX_RADIX);
 		int occurence = Integer.parseInt(parts[1], Character.MAX_RADIX);
-		return new Posting(documentId, occurence);
+		return new Posting(term, documentId, occurence);
 	}
 	
 	public String toString() {
@@ -61,5 +63,9 @@ public class Posting implements Comparable<Posting> {
 	@Override
 	public int compareTo(Posting p) {
 		return new Integer(this.getDocumentId()).compareTo(p.getDocumentId());
+	}
+
+	public String getTerm() {
+		return term;
 	}
 }

@@ -79,7 +79,7 @@ public class SPIMIReconciliation {
 						skip=false;
 						continue;
 					}
-					Posting p = Posting.fromString(s);
+					Posting p = Posting.fromString(token, s);
 					if (result.add(p) == false)
 						for (Posting p2 : result)
 						{

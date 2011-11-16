@@ -1,6 +1,6 @@
 package info.mathieusavard.domain;
 
-public class GenericDocument {
+public class GenericDocument implements Comparable<GenericDocument> {
 
 	protected Integer id;
 	protected String title;
@@ -25,7 +25,7 @@ public class GenericDocument {
 
 	public GenericDocument(int id, String title) {
 		this.id =id;
-		this.title = title;
+		this.title = title.replace('\n', ' ');
 	}
 
 	public void setText(String text) {
@@ -33,7 +33,7 @@ public class GenericDocument {
 	}
 	public GenericDocument(int id, String title, int length) {
 		this.id =id;
-		this.title = title;
+		this.title = title.replace('\n', ' ');
 		this.length = length;
 	}
 
@@ -54,7 +54,7 @@ public class GenericDocument {
 
 	
 	public String toString() {
-		return getId() + ":" + getLengthInWords() + getTitle();
+		return getId() + ":" + getLengthInWords() + ":" + getTitle();
 	}
 	
 	public static GenericDocument fromString(String input) {
@@ -65,5 +65,10 @@ public class GenericDocument {
 		if (parts.length > 2)
 			title = parts[2].trim();
 		return new GenericDocument(id, title, length);
+	}
+
+	@Override
+	public int compareTo(GenericDocument o) {
+		return (new Integer(this.getId())).compareTo(o.getId());
 	}
 }

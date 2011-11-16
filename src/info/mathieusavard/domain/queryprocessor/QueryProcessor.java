@@ -169,5 +169,9 @@ public class QueryProcessor {
 		return resultSet;
 	}
 
+	public static DefaultInvertedIndex getIndex() {
+		return index;
+	}
+
 
 }
