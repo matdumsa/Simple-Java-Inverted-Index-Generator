@@ -17,22 +17,22 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	private DefaultInvertedIndex postingList = new DefaultInvertedIndex();
 
 	public SPIMIInvertedIndex() {
-		flushBlock();
-		acquireNewBlock();
+		currentBlockNumber = acquireNewBlock();
 	}
 
 	private void flushBlock() {
 		if (currentSize > 0) {
 			System.out.println("Flushing block " + currentBlockNumber);
 			postingList.writeToFile(String.valueOf(currentBlockNumber) + ".spimi");
+			postingList = new DefaultInvertedIndex();
+			currentBlockNumber = acquireNewBlock();
+			currentSize = 0;
 		}
 		
 	}
 
-	private synchronized void acquireNewBlock() {
-		postingList = new DefaultInvertedIndex();
-		currentBlockNumber = TotalBlockCounter++;
-		currentSize = 0;
+	private synchronized int acquireNewBlock() {
+		return ++TotalBlockCounter;
 	}
 	
 	@Override
