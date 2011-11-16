@@ -118,7 +118,6 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		map.clear();		
 	}
 	
-	@Override
 	public synchronized void writeToFile(String path) {
 		try {
 			StringBuilder sb = new StringBuilder();

@@ -17,30 +17,32 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	private DefaultInvertedIndex postingList = new DefaultInvertedIndex();
 
 	public SPIMIInvertedIndex() {
-		currentBlockNumber = acquireNewBlock();
+
 	}
 
-	private void flushBlock() {
+	public void flushBlock() {
 		if (currentSize > 0) {
 			System.out.println("Flushing block " + currentBlockNumber);
 			postingList.writeToFile(String.valueOf(currentBlockNumber) + ".spimi");
 			postingList = new DefaultInvertedIndex();
-			currentBlockNumber = acquireNewBlock();
 			currentSize = 0;
 		}
 		
 	}
 
-	private synchronized int acquireNewBlock() {
-		return ++TotalBlockCounter;
+	private void acquireNewBlock() {
+		synchronized(TotalBlockCounter) {
+			currentBlockNumber = TotalBlockCounter++;
+		}
 	}
 	
 	@Override
 	public boolean add(String token, int id) {
 		if (currentSize >= MEMORY_SIZE) {
 			flushBlock();
-			currentBlockNumber = acquireNewBlock();
 		}
+		if (currentSize == 0)
+			acquireNewBlock();
 		
 		//If the defaultPostingList tells me this is a new term/doc I increment size
 		if (postingList.add(token, id) == true)
@@ -72,11 +74,6 @@ public class SPIMIInvertedIndex implements IInvertedIndex {
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub		
-	}
-
-	@Override
-	public void writeToFile(String path) {
-		flushBlock();
 	}
 	
 	public static int getTotalBlock() {

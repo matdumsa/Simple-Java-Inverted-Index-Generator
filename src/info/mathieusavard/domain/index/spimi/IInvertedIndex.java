@@ -20,8 +20,6 @@ public interface IInvertedIndex extends Iterable<String> {
 	public abstract Iterator<String> iterator();
 
 	public abstract void clear();
-
-	public abstract void writeToFile(String path);
 	
 	public abstract HashSet<Posting> getAll();
 
