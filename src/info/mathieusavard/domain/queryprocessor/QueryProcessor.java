@@ -1,8 +1,8 @@
 package info.mathieusavard.domain.queryprocessor;
 
-import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
+import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.domain.queryprocessor.booleantree.InfixToPostfix;

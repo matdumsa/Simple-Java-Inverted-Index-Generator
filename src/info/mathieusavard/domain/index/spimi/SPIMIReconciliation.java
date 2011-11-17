@@ -1,8 +1,7 @@
 package info.mathieusavard.domain.index.spimi;
 
-import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.Posting;
-import info.mathieusavard.domain.WeightedCorpus;
+import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.technicalservices.Constants;
 
 import java.io.BufferedWriter;
@@ -50,12 +49,8 @@ public class SPIMIReconciliation {
 				(new File(Constants.basepath + "/" + String.valueOf(i) + ".spimi")).delete();
 			}
 			
-			if (CorpusFactory.getCorpus() instanceof WeightedCorpus){
-				WeightedCorpus c = (WeightedCorpus)CorpusFactory.getCorpus();
-				c.closeIndex();
-			} else {
-				CorpusFactory.getCorpus().closeIndex();
-			}
+			//Signal the corpus we are done reconciling.
+			CorpusFactory.getCorpus().closeIndex();
 				
 
 		} catch (FileNotFoundException e) {
