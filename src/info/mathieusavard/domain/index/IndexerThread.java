@@ -57,8 +57,8 @@ public class IndexerThread extends Thread {
 			d = popOrWait();
 		}
 
-		index.writeToFile(""); // flush the last spimi shard
-
+		index.flushBlock(); // flush the last spimi shard
+		index = null;
 		synchronized(filesToProcess) {
 			System.out.println(super.getName() + " says: I'm done working, deallocate.");
 			filesToProcess.notifyAll(); //ÊTelling others it's fine to stop..			
