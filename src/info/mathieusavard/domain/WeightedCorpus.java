@@ -1,6 +1,7 @@
 package info.mathieusavard.domain;
 
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
+
 import java.util.LinkedList;
 import java.util.TreeMap;
 

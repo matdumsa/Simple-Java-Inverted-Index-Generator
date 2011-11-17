@@ -1,10 +1,9 @@
 package info.mathieusavard.domain.index;
-import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.CorpusFactory;
+import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
 import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
-import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 

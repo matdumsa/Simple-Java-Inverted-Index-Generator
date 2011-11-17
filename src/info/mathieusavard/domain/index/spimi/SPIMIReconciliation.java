@@ -1,6 +1,5 @@
 package info.mathieusavard.domain.index.spimi;
 
-import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.domain.WeightedCorpus;
