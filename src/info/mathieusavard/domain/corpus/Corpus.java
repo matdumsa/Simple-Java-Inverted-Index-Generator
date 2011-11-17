@@ -16,7 +16,8 @@ public class Corpus {
 
 	protected TreeMap<Integer, GenericDocument> documentMap;
 	private static Class<? extends GenericDocument> factory = GenericDocument.class;
-
+	private boolean readOnly=false; //when a Corpus is created, it is read-write and when finalized, it becomes read-only
+	
 	//Default constructor allow only the factory in this package to create instances
 	Corpus() {
 		super();
@@ -36,11 +37,14 @@ public class Corpus {
 	public synchronized void addArticle(GenericDocument d) {
 		if (documentMap == null)
 			documentMap = new TreeMap<Integer, GenericDocument>();
+		if (readOnly==true)
+			throw new RuntimeException("Oups.. looks like you tried to add documents to a corpus that was finalized. It's now read-only.");
 		documentMap.put(d.getId(), d);
 	}
 	
 	public void closeIndex(){
 		writeToDisk();
+		readOnly=true;
 	}
 	
 	protected void writeToDisk() {
@@ -93,6 +97,7 @@ public class Corpus {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		newCorpus.readOnly=true;
 		
 	}
 	
