@@ -24,7 +24,6 @@ public class ThreadTFIDF extends Thread {
 
 
 	public void run(){
-		System.out.println("Starting Thread" + super.getId());
 		int articleToProcess;
 		synchronized(currentArticle){
 			articleToProcess = currentArticle;
@@ -43,7 +42,6 @@ public class ThreadTFIDF extends Thread {
 				docCorpus.setVector(getTFIDFVector(data.get(docCorpus)));
 			}
 		}
-		System.out.println("Stoping Thread" + super.getId() + " with the last article " + (articleToProcess-1));
 	}
 
 	private TFIDFVector getTFIDFVector(LinkedList<Posting> linkedList) {

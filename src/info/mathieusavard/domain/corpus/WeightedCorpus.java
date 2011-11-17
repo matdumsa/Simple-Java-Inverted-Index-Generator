@@ -20,7 +20,7 @@ public class WeightedCorpus extends Corpus {
 	
 	private DefaultInvertedIndex index;  
 	private Stack<ThreadTFIDF> pool = new Stack<ThreadTFIDF>();
-	private int NUMBER_OF_THREAD = 2;
+	private int NUMBER_OF_THREAD = 4;
 	//Default constructor allow only the factory in this package to create instances
 	public WeightedCorpus() {
 		super();
@@ -39,6 +39,7 @@ public class WeightedCorpus extends Corpus {
 		if (index.validate() == false)
 			throw new RuntimeException("Invalid index, cannot compute TFIDF on an invalid index");
 		TreeMap<GenericDocument, LinkedList<Posting>> data = index.getDocumentBasedIndex();
+		System.out.println("Starting TF-IDF computing");
 		for (int i = 0; i < NUMBER_OF_THREAD; i++){
 			ThreadTFIDF thread = new ThreadTFIDF(data, this, index);
 			pool.add(thread);
@@ -52,6 +53,7 @@ public class WeightedCorpus extends Corpus {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Computing TF-IDF finished");
 		bench.stop();
 		System.out.println(bench.toString());
 	}
