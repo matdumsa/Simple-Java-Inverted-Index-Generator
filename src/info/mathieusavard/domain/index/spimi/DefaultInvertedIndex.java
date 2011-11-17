@@ -108,6 +108,36 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		return r;
 	}
 	
+	/**
+	 * Count how-many document in the index have the specified term
+	 * @param term, term to look-up in the index
+	 * @return the number of distinct document posessing that term at least once
+	 */
+	public int getIDFScore(String term) {
+		return map.get(term).size();
+	}
+	
+	/**
+	 * Validate the index to make sure it holds the following properties for every term
+	 * - The list of PostingList is not null
+	 * - The list of PostingList contains only unique document id
+	 * @return result of the validation
+	 */
+	public boolean validate() {
+		HashSet<Integer> docSet = new HashSet<Integer>();
+		for (String term : map.keySet()) {
+			List<Posting> pl = map.get(term);
+			if (pl == null) return false;
+			docSet.clear();
+			for (Posting p : pl) {
+				if (docSet.contains(p.getDocumentId()))
+					return false;
+				else
+					docSet.add(p.getDocumentId());
+			}
+		}
+		return true;
+	}
 	
 	@Override
 	public Iterator<String> iterator() {

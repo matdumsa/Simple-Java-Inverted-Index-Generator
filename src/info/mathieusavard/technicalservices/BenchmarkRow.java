@@ -24,7 +24,10 @@ public class BenchmarkRow {
 	}
 
 	public long getDuration() {
-		// TODO Auto-generated method stub
 		return runningFor;
+	}
+	
+	public String toString() {
+		return name + " ran for " + (double)getDuration()/1000.0 + " sec.";
 	}
 }

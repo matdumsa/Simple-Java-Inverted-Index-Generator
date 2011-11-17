@@ -21,6 +21,7 @@ public class Corpus {
 	//Default constructor allow only the factory in this package to create instances
 	Corpus() {
 		super();
+		System.out.println("Creating a corpus");
 		if (CorpusFactory.corpus != null)
 			throw new RuntimeException("Oups.. you can't create a new corpus if there is already one in CorpusFactory");
 	}

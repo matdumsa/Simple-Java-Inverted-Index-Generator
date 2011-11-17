@@ -25,8 +25,12 @@ public class ThreadTFIDF extends Thread {
 
 	public void run(){
 		System.out.println("Starting Thread" + super.getId());
-		while (currentArticle < NUMBER_MAX_DOC){
-			int articleToProcess;
+		int articleToProcess;
+		synchronized(currentArticle){
+			articleToProcess = currentArticle;
+			currentArticle++;
+		}
+		while (articleToProcess < NUMBER_MAX_DOC){
 			synchronized(currentArticle){
 				articleToProcess = currentArticle;
 				currentArticle++;
@@ -39,7 +43,7 @@ public class ThreadTFIDF extends Thread {
 				docCorpus.setVector(getTFIDFVector(data.get(docCorpus)));
 			}
 		}
-		System.out.println("Stoping Thread" + super.getId() + " with the last article " + (currentArticle-1));
+		System.out.println("Stoping Thread" + super.getId() + " with the last article " + (articleToProcess-1));
 	}
 
 	private TFIDFVector getTFIDFVector(LinkedList<Posting> linkedList) {
@@ -53,8 +57,8 @@ public class ThreadTFIDF extends Thread {
 	}
 
 	private Double computeTFIDFScore(Posting p) {
-		double tf = (1+Math.log(p.getOccurence()));
-		double idf = Math.log(data.size()/index.getSet(p.getTerm()).size());
+		double tf = (1.0+Math.log(p.getOccurence()));
+		double idf = Math.log((double)data.size()/(double)index.getIDFScore(p.getTerm()));
 		return tf*idf;
 	}
 
