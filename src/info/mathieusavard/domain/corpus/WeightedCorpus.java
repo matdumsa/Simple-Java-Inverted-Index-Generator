@@ -3,10 +3,12 @@ package info.mathieusavard.domain.corpus;
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.domain.TFIDFVector;
+import info.mathieusavard.domain.ThreadTFIDF;
 import info.mathieusavard.domain.WeightedDocument;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 
 import java.util.LinkedList;
+import java.util.Stack;
 import java.util.TreeMap;
 
 
@@ -18,11 +20,13 @@ import java.util.TreeMap;
 public class WeightedCorpus extends Corpus {
 	
 	private DefaultInvertedIndex index;  
-	
+	private Stack<ThreadTFIDF> pool = new Stack<ThreadTFIDF>();
+	private int NUMBER_OF_THREAD = 2;
 	//Default constructor allow only the factory in this package to create instances
-	WeightedCorpus() {
+	public WeightedCorpus() {
 		super();
 	}
+	
 	public void closeIndex(){
 		computeTFIDFVector();
 		super.closeIndex();
@@ -31,26 +35,19 @@ public class WeightedCorpus extends Corpus {
 	private void computeTFIDFVector() {
 		index = DefaultInvertedIndex.readFromFile("index.txt");
 		TreeMap<GenericDocument, LinkedList<Posting>> data = index.getDocumentBasedIndex();
-		for (GenericDocument gd : data.keySet()){
-			if (gd instanceof WeightedDocument) {
-				WeightedDocument docCorpus = (WeightedDocument)findArticle(gd.getId());
-				docCorpus.setVector(getTFIDFVector(data.get(docCorpus)));
+		for (int i = 0; i < NUMBER_OF_THREAD; i++){
+			ThreadTFIDF thread = new ThreadTFIDF(data, this, index);
+			pool.add(thread);
+			thread.start();
+		}
+		for (ThreadTFIDF t : pool){
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-	}
-
-	private TFIDFVector getTFIDFVector(LinkedList<Posting> linkedList) {
-		TFIDFVector vector = new TFIDFVector();
-		for (Posting p : linkedList){
-			vector.getVector().put(p.getTerm(), computeTFIDFScore(p));
-		}
-		return vector;
-	}
-
-	private Double computeTFIDFScore(Posting p) {
-		double tf = (1+Math.log(p.getOccurence()));
-		double idf = Math.log(documentMap.size()/index.getSet(p.getTerm()).size());
-		return tf*idf;
 	}
 
 
