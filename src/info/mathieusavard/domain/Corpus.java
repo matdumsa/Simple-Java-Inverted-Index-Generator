@@ -13,7 +13,7 @@ import java.util.TreeMap;
 
 public class Corpus {
 
-	private static TreeMap<Integer, GenericDocument> documentMap;
+	protected static TreeMap<Integer, GenericDocument> documentMap;
 	private static Class<? extends GenericDocument> factory = GenericDocument.class;
 
 
@@ -32,7 +32,12 @@ public class Corpus {
 		documentMap.put(d.getId(), d);
 	}
 	
-	public static void writeToDisk() {
+	public static void closeIndex(){
+		writeToDisk();
+		System.out.println("caca1");
+	}
+	
+	protected static void writeToDisk() {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(Constants.basepath + "/articles.txt"));
 			for (Integer i : documentMap.keySet()) {

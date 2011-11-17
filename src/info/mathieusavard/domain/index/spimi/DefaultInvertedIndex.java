@@ -1,5 +1,6 @@
 package info.mathieusavard.domain.index.spimi;
 import info.mathieusavard.domain.Corpus;
+import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.technicalservices.BenchmarkRow;
@@ -209,7 +210,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		br.start();
 		for (Collection<Posting> collection : map.values()) {
 			for (Posting p : collection) {
-				GenericDocument doc = Corpus.findArticle(p.getDocumentId());
+				GenericDocument doc = CorpusFactory.getCorpus().findArticle(p.getDocumentId());
 				if (result.containsKey(doc))
 					result.get(doc).add(p);
 				else {

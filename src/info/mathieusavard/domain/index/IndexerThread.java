@@ -1,5 +1,6 @@
 package info.mathieusavard.domain.index;
 import info.mathieusavard.domain.Corpus;
+import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
 import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
@@ -51,7 +52,7 @@ public class IndexerThread extends Thread {
 		GenericDocument d = popOrWait();
 		while (d != null) {
 			processDocument(d);
-			Corpus.addArticle(d);
+			CorpusFactory.getCorpus().addArticle(d);
 			d.clearContent();
 			d = popOrWait();
 		}

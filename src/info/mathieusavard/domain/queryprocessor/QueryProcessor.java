@@ -1,5 +1,6 @@
 package info.mathieusavard.domain.queryprocessor;
 
+import info.mathieusavard.domain.CorpusFactory;
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Corpus;
 import info.mathieusavard.domain.Posting;
@@ -50,14 +51,14 @@ public class QueryProcessor {
 		if (Property.getBoolean("enable_ranking") == false) {
 			HashSet<Result> resultSet = new HashSet<Result>();
 			for (Posting p : matchingDocument) 
-				resultSet.add(new Result(Corpus.findArticle(p.getDocumentId()), 1));
+				resultSet.add(new Result(CorpusFactory.getCorpus().findArticle(p.getDocumentId()), 1));
 			return resultSet;
 		}
 		else {
 			TreeSet<Result> results = new TreeSet<Result>();
 			// Looking to rank each document in regards to query positive terms.
 			for (Posting p : matchingDocument) {
-				Result result = makeRank(Corpus.findArticle(p.getDocumentId()),queryPositiveTerms);
+				Result result = makeRank(CorpusFactory.getCorpus().findArticle(p.getDocumentId()),queryPositiveTerms);
 				results.add(result);
 
 			}
@@ -68,10 +69,10 @@ public class QueryProcessor {
 
 	//This methods applies Okapi BM25
 	private static Result makeRank(GenericDocument abstractDocument, String queryPositiveTerms) {
-		double N = Corpus.size();	//corpus size
+		double N = CorpusFactory.getCorpus().size();	//corpus size
 		double k1 = 1.5;
 		double b = 0.75;
-		double avgDl = Corpus.getTotalLength()/N;
+		double avgDl = CorpusFactory.getCorpus().getTotalLength()/N;
 		double result =0;
 		for (String term : queryPositiveTerms.split(" ")) {
 			double numberOfDocumentContainingT = index.getSet(term).size();
