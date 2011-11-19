@@ -63,7 +63,7 @@ public class Corpus {
 	}
 	
 	public static void readFromDisk() {
-		Corpus newCorpus = new Corpus();
+		Corpus newCorpus = CorpusFactory.getCorpus();
 		newCorpus.documentMap = new TreeMap<Integer, GenericDocument>();
 		try {
 			LineNumberReader in = new LineNumberReader(new FileReader(Constants.basepath + "/articles.txt"));
