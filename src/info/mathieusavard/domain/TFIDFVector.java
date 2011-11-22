@@ -19,7 +19,7 @@ public class TFIDFVector {
 	
 	public String toString(){
 		String result = "";
-		DecimalFormat df = new DecimalFormat("0.000000000");
+		DecimalFormat df = new DecimalFormat("0.00");
 		for (int i = 0; i < vector.size(); i++){
 			result = result +  vector.firstEntry().getKey() + ":" + df.format(vector.pollFirstEntry().getValue())+ " ";
 		}
