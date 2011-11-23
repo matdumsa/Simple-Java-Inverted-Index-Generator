@@ -28,4 +28,9 @@ public class WebDocument extends WeightedDocument {
 		return wd;
 
 	}
+
+	public void setId(int currentPage) {
+		this.id = currentPage;
+		
+	}
 }
