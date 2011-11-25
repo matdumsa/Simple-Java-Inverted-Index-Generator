@@ -33,4 +33,19 @@ public class WebDocument extends WeightedDocument {
 		this.id = currentPage;
 		
 	}
+	
+	public String getUrl(){
+		return url;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof WebDocument){
+			WebDocument w = (WebDocument)o;
+			return (this.url.equals(w.getUrl()));
+		} else {
+			return false;
+		}
+	}
+	
 }

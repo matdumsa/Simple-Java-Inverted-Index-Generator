@@ -71,4 +71,5 @@ public class GenericDocument implements Comparable<GenericDocument> {
 	public int compareTo(GenericDocument o) {
 		return (new Integer(this.getId())).compareTo(o.getId());
 	}
+
 }

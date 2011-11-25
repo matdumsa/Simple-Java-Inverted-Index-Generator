@@ -55,7 +55,7 @@ public class ThreadTFIDF extends Thread {
 	}
 
 	private Double computeTFIDFScore(Posting p) {
-		double tf = (1.0+Math.log(p.getOccurence()));
+		double tf = (double)p.getOccurence();//(1.0+Math.log(p.getOccurence()));
 		double idf = Math.log((double)data.size()/(double)index.getIDFScore(p.getTerm()));
 		return tf*idf;
 	}

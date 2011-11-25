@@ -1,5 +1,6 @@
 package info.mathieusavard.domain.index;
 import info.mathieusavard.domain.GenericDocument;
+import info.mathieusavard.domain.WebDocument;
 import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
