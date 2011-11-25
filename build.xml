@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="InformationRetrieval">
+    <property environment="env"/>
+    <property name="COMp479-Final-Project.location" value="../COMP479-Final-Project"/>
+    <property name="ECLIPSE_HOME" value="../../../../Applications/eclipse indigo"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="Web App Libraries.libraryclasspath"/>
+    <path id="EAR Libraries.libraryclasspath"/>
+    <path id="Apache Tomcat v6.0 [Apache Tomcat v6.0].libraryclasspath">
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/annotations-api.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/catalina-ant.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/catalina-ha.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/catalina-tribes.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/catalina.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/ecj-3.3.1.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/el-api.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/jasper-el.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/jasper.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/jsp-api.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/servlet-api.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/tomcat-coyote.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/tomcat-dbcp.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/tomcat-i18n-es.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/tomcat-i18n-fr.jar"/>
+        <pathelement location="../../Downloads/apache-tomcat-6.0.33/lib/tomcat-i18n-ja.jar"/>
+    </path>
+    <path id="InformationRetrieval.classpath">
+        <pathelement location="bin"/>
+        <path refid="Web App Libraries.libraryclasspath"/>
+        <path refid="EAR Libraries.libraryclasspath"/>
+        <path refid="Apache Tomcat v6.0 [Apache Tomcat v6.0].libraryclasspath"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="InformationRetrieval.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+        <ant antfile="build.xml" dir="${COMp479-Final-Project.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${COMp479-Final-Project.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="ArithmeticTreeMain">
+        <java classname="info.mathieusavard.domain.queryprocessor.booleantree.ArithmeticTreeMain" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="GenerateIndex (2)">
+        <java classname="info.mathieusavard.domain.index.spimi.GenerateIndex" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="InfixToPostfix">
+        <java classname="info.mathieusavard.domain.queryprocessor.booleantree.InfixToPostfix" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="InteractiveQuery (1)">
+        <java classname="info.mathieusavard.queryprocessor.InteractiveQuery" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="InteractiveQuery">
+        <java classname="info.mathieusavard.application.console.InteractiveQuery" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="Stemmer (1)">
+        <java classname="info.mathieusavard.domain.index.compression.Stemmer" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="test">
+        <java classname="info.mathieusavard.domain.queryprocessor.booleantree.test" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+    <target name="XMLHandlerListAll">
+        <java classname="info.mathieusavard.domain.reuters.XMLHandlerListAll" failonerror="true" fork="yes">
+            <classpath refid="InformationRetrieval.classpath"/>
+        </java>
+    </target>
+</project>
