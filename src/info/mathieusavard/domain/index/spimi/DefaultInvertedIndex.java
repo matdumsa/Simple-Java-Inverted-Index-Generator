@@ -27,7 +27,7 @@ import java.util.TreeMap;
 public class DefaultInvertedIndex implements IInvertedIndex {
 
 	private AbstractMap<String, ArrayList<Posting>> map = new TreeMap<String, ArrayList<Posting>>();
-	
+
 	boolean add(String token, ArrayList<Posting> documentList) {
 		if (token == null ) return false;
 		if (map.containsKey(token)) {
@@ -38,9 +38,9 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			map.put(token, documentList);
 			return false;
 		}
-	
+
 	}
-	
+
 	private ArrayList<Posting> mergeTwoPostingList(ArrayList<Posting> a, ArrayList<Posting> b) {
 		for (Posting p1:a) {
 			int idxInB = b.indexOf(p1);
@@ -76,7 +76,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			return true;
 		}
 	}
-	
+
 	/*
 	 * This method merges index b into index a.
 	 */
@@ -85,7 +85,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			this.add(tokenb, b.map.get(tokenb));
 		}
 	}
-	
+
 	@Override
 	public Set<String> keySet() {
 		return map.keySet();
@@ -105,9 +105,9 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		HashSet<Posting> r = new HashSet<Posting>(map.get(token).size());
 		for (Posting n : map.get(token))
 			r.add(n);
-		return r;
+				return r;
 	}
-	
+
 	/**
 	 * Count how-many document in the index have the specified term
 	 * @param term, term to look-up in the index
@@ -116,7 +116,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	public int getIDFScore(String term) {
 		return map.get(term).size();
 	}
-	
+
 	/**
 	 * Validate the index to make sure it holds the following properties for every term
 	 * - The list of PostingList is not null
@@ -138,7 +138,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public Iterator<String> iterator() {
 		return map.keySet().iterator();
@@ -147,7 +147,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	public void clear() {
 		map.clear();		
 	}
-	
+
 	public synchronized void writeToFile(String path) {
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -158,7 +158,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 				sb.append(token + " ");
 				for (Posting i : this.getSet(token))
 					sb.append(i.toString() + " ");
-				sb.append("\n");
+						sb.append("\n");
 			}
 			fstream.write(sb.toString());
 			// Close the index file.
@@ -169,7 +169,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		}
 
 	}
-	
+
 	public static DefaultInvertedIndex readFromFile(String path) {
 		try {
 			TreeMap<String, ArrayList<Posting>> newMap = new TreeMap<String, ArrayList<Posting>>();
@@ -182,7 +182,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 			// For each token of the index
 			String line = in.readLine();
 
-			
+
 			String term = null;
 			while (line != null) {
 				StringTokenizer st = new StringTokenizer(line);
@@ -198,7 +198,7 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 						postingList[i++] = Posting.fromString(term, st.nextToken());
 					}
 				}
-				
+
 				newMap.put(term, new ArrayList<Posting>(Arrays.asList((postingList))));
 				line = in.readLine();
 			}
@@ -227,24 +227,26 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 		}
 		return all;
 	}
-	
+
 	/*
 	 * Used for tf-idf
 	 */
 	public TreeMap<GenericDocument, LinkedList<Posting>> getDocumentBasedIndex() {
 		TreeMap<GenericDocument, LinkedList<Posting>> result = new TreeMap<GenericDocument, LinkedList<Posting>>();
-		
+
 		BenchmarkRow br = new BenchmarkRow("Document based index");
 		br.start();
 		for (Collection<Posting> collection : map.values()) {
 			for (Posting p : collection) {
 				GenericDocument doc = CorpusFactory.getCorpus().findArticle(p.getDocumentId());
-				if (result.containsKey(doc))
-					result.get(doc).add(p);
-				else {
-					LinkedList<Posting> ll = new LinkedList<Posting>();
-					ll.add(p);
-					result.put(doc, ll);
+				if (doc!=null){
+					if (result.containsKey(doc))
+						result.get(doc).add(p);
+					else {
+						LinkedList<Posting> ll = new LinkedList<Posting>();
+						ll.add(p);
+						result.put(doc, ll);
+					}
 				}
 			}
 		}

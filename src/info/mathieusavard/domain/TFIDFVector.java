@@ -26,4 +26,26 @@ public class TFIDFVector {
 		return result;
 	}
 	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof TFIDFVector){
+			TFIDFVector v = (TFIDFVector)o;
+			if (v.getVector().size()!=this.vector.size()){
+				return false;
+			} else {
+			for (String s : vector.keySet()){
+				for (String s2 : v.getVector().keySet()){
+					if (!s.equals(s2) || v.getVector().get(s2)!=this.vector.get(s)){
+						return false;
+					}
+				}
+				
+			}
+			return true;
+			}
+		} else{
+			return false;
+		}
+	}
+	
 }
