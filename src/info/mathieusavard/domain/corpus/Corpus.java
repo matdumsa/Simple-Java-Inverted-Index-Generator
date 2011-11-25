@@ -105,6 +105,7 @@ public class Corpus {
 				}
 					line = in.readLine();
 			}
+			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
