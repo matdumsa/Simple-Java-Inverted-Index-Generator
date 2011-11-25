@@ -1,7 +1,6 @@
 package info.mathieusavard.domain.corpus;
 
 import info.mathieusavard.domain.GenericDocument;
-import info.mathieusavard.domain.WebDocument;
 import info.mathieusavard.technicalservices.Constants;
 
 import java.io.BufferedWriter;
@@ -41,14 +40,8 @@ public class Corpus {
 			documentMap = new TreeMap<Integer, GenericDocument>();
 		if (readOnly==true)
 			throw new RuntimeException("Oups.. looks like you tried to add documents to a corpus that was finalized. It's now read-only.");
-		// Check if this document is a WebDocument 
-		if (d instanceof WebDocument){
-			WebDocument dWeb = (WebDocument)d;
-			// if yes, check if its url is not already contained
-			if (!documentMap.values().contains(dWeb)){
-				documentMap.put(d.getId(), d);
-			}
-		} else {
+		// Check if this document already exists
+		if (!documentMap.values().contains(d)){
 			documentMap.put(d.getId(), d);
 		}
 	}
