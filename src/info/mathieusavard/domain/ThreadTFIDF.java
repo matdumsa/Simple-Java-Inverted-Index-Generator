@@ -1,45 +1,34 @@
 package info.mathieusavard.domain;
 
-import info.mathieusavard.domain.corpus.WeightedCorpus;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
+import info.mathieusavard.technicalservices.Pair;
 
 import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ThreadTFIDF extends Thread {
 
-	private TreeMap<GenericDocument, LinkedList<Posting>> data;
-	private WeightedCorpus corpus;
-	private int NUMBER_MAX_DOC;
+	private LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo;
 	private DefaultInvertedIndex index;
-	private static Integer currentArticle = 0;
+	private double corpusSize = 0;
 
-	public ThreadTFIDF (TreeMap<GenericDocument, LinkedList<Posting>> data, WeightedCorpus c, DefaultInvertedIndex d){
-		this.data = data;
-		this.corpus = c;
+	public ThreadTFIDF (LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo, DefaultInvertedIndex d, int corpusSize){
+		this.workToDo = workToDo;
 		this.index = d;
-		NUMBER_MAX_DOC = data.size();
+		this.corpusSize = (double) corpusSize;
 	}
 
 
 
 	public void run(){
-		int articleToProcess;
-		synchronized(currentArticle){
-			articleToProcess = currentArticle;
-			currentArticle++;
-		}
-		while (articleToProcess < NUMBER_MAX_DOC){
-			synchronized(currentArticle){
-				articleToProcess = currentArticle;
-				currentArticle++;
-			}
-			if ((articleToProcess % 500) == 0 ){
-				System.out.println(articleToProcess + " Vectors TFIDF computed");
-			}
-			WeightedDocument docCorpus = (WeightedDocument)corpus.findArticle(articleToProcess);
-			if (docCorpus!=null){
-				docCorpus.setVector(getTFIDFVector(data.get(docCorpus)));
+		while (workToDo.size() > 0) {
+			Pair<GenericDocument, LinkedList<Posting>> pair;
+			try {
+				pair = workToDo.take();
+				WeightedDocument wd = (WeightedDocument) pair.getFirst();
+				wd.setVector(getTFIDFVector(pair.getSecond()));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -56,7 +45,7 @@ public class ThreadTFIDF extends Thread {
 
 	private Double computeTFIDFScore(Posting p) {
 		double tf = (double)p.getOccurence();//(1.0+Math.log(p.getOccurence()));
-		double idf = Math.log((double)data.size()/(double)index.getIDFScore(p.getTerm()));
+		double idf = Math.log(corpusSize/(double)index.getIDFScore(p.getTerm()));
 		return tf*idf;
 	}
 

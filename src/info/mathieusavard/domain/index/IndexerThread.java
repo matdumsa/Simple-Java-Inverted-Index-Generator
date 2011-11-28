@@ -1,6 +1,5 @@
 package info.mathieusavard.domain.index;
 import info.mathieusavard.domain.GenericDocument;
-import info.mathieusavard.domain.WebDocument;
 import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.domain.index.compression.Stemmer;
 import info.mathieusavard.domain.index.compression.StopwordRemover;
@@ -8,8 +7,10 @@ import info.mathieusavard.domain.index.spimi.SPIMIInvertedIndex;
 import info.mathieusavard.technicalservices.Property;
 import info.mathieusavard.technicalservices.Utils;
 
-import java.util.Stack;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 public class IndexerThread extends Thread {
@@ -19,50 +20,49 @@ public class IndexerThread extends Thread {
 	private static final boolean COMPRESSION_CASE_FOLDING=Property.getBoolean("COMPRESSION_CASE_FOLDING");
 	private static final boolean COMPRESSION_STOP_WORDS=Property.getBoolean("COMPRESSION_STOP_WORDS");
 	private static final boolean COMPRESSION_STEMMING=Property.getBoolean("COMPRESSION_STEMMING");
-
+	private static final LinkedList<IndexerThread> threadList = new LinkedList<IndexerThread>();
+	
 	//create an instance of the stemmer wrapper for the PorterStemmer.
 	private Stemmer stemmer = new Stemmer();
 	private SPIMIInvertedIndex index;
-	private static Stack<GenericDocument> filesToProcess = new Stack<GenericDocument>();
+	private static LinkedBlockingQueue<GenericDocument> documentToProcess = new LinkedBlockingQueue<GenericDocument>(500);
 	//When set to true, the thread will sleep waiting for new document to index
 	private static boolean noMoreDocumentsWillBeAdded = false;
 
 	public IndexerThread(String tName) {
 		super(tName);
-	}
-
-	public GenericDocument popOrWait() {
-		try {
-			synchronized(filesToProcess) {
-				if (filesToProcess.size() == 0) {
-					if (noMoreDocumentsWillBeAdded == true)
-						return null;
-					filesToProcess.wait();
-					return popOrWait();
-				}
-				return filesToProcess.pop();
-			}
-		} catch (InterruptedException e) {
-			return null;
+		synchronized(threadList) {
+			threadList.add(this);			
 		}
 	}
+
 	public void run() {
 		index = new SPIMIInvertedIndex();
 
-		GenericDocument d = popOrWait();
-		while (d != null) {
-			processDocument(d);
-			CorpusFactory.getCorpus().addArticle(d);
-			d.clearContent();
-			d = popOrWait();
+		try {
+			GenericDocument d = documentToProcess.take();
+			while (d != null) {
+				processDocument(d);
+				CorpusFactory.getCorpus().addArticle(d);
+				d.clearContent();
+				d = documentToProcess.take();
+			}
+		} catch (InterruptedException e) {
+			//Hmm.. I was interrupted.. Maybe work is over, check that out..
+			if (documentToProcess.size() == 0 && noMoreDocumentsWillBeAdded == true)
+			{
+				// All right.. this is over
+				index.flushBlock(); // flush the last spimi shard
+				index = null;
+				System.out.println(super.getName() + " says: I'm done working, deallocate.");
+			}
+			else {
+				// Keep going on.
+				run();
+			}
 		}
 
-		index.flushBlock(); // flush the last spimi shard
-		index = null;
-		synchronized(filesToProcess) {
-			System.out.println(super.getName() + " says: I'm done working, deallocate.");
-			filesToProcess.notifyAll(); //ÊTelling others it's fine to stop..			
-		}
+
 	}
 
 	private void processDocument(GenericDocument d) {
@@ -111,17 +111,23 @@ public class IndexerThread extends Thread {
 
 	public static void signalNoMoreDocumentsAreExpected() {
 		noMoreDocumentsWillBeAdded=true;
-		synchronized(filesToProcess) {
-			filesToProcess.notify();
+		for (Thread t: threadList) {
+			//Wake the sleepers 
+			t.interrupt();
 		}
 	}
 
 	public static void addDocument(GenericDocument d) {
 		if (noMoreDocumentsWillBeAdded == true)
-			throw new RuntimeException("You cannot add document is this tokenizer thread is not expecting them");
-		synchronized(filesToProcess) {
-			filesToProcess.push(d);
-			filesToProcess.notify();
+			throw new RuntimeException("You cannot add document is this indexer thread is not expecting them");
+		try { 
+			if (documentToProcess.offer(d, 10, TimeUnit.SECONDS) == false) {
+				System.err.println("The queue got full and 10 seconds elapsed.. I'm dropping this document");
+			}
+		}
+		catch (InterruptedException e) {
+			//Looks like I got interrupted but resume
+			addDocument(d);
 		}
 	}
 }

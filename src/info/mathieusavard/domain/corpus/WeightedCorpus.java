@@ -5,10 +5,12 @@ import info.mathieusavard.domain.Posting;
 import info.mathieusavard.domain.ThreadTFIDF;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.technicalservices.BenchmarkRow;
+import info.mathieusavard.technicalservices.Pair;
 
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -40,8 +42,15 @@ public class WeightedCorpus extends Corpus {
 			throw new RuntimeException("Invalid index, cannot compute TFIDF on an invalid index");
 		TreeMap<GenericDocument, LinkedList<Posting>> data = index.getDocumentBasedIndex();
 		System.out.println("Starting TF-IDF computing");
+		LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo = new LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>>();
+		
+		for (GenericDocument gd : data.keySet()) {
+			Pair<GenericDocument, LinkedList<Posting>> pair = new Pair<GenericDocument, LinkedList<Posting>>(gd, data.get(gd));
+			workToDo.add(pair);
+		}
+		
 		for (int i = 0; i < NUMBER_OF_THREAD; i++){
-			ThreadTFIDF thread = new ThreadTFIDF(data, this, index);
+			ThreadTFIDF thread = new ThreadTFIDF(workToDo, index, this.size());
 			pool.add(thread);
 			thread.start();
 		}
