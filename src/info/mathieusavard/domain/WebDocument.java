@@ -12,7 +12,7 @@ public class WebDocument extends WeightedDocument {
 
 	@Override
 	public String toString() {
-		return super.getId() + "#" + super.getLengthInWords() + "#" + super.getTitle() + "#" + super.getVector() + "#" + url;
+		return super.getId() + "#" + super.getLengthInWords() + "#" + super.getTitle() + "#" + url + "#" + super.getVector();
 	}
 
 	public static WebDocument fromString(String input) {
