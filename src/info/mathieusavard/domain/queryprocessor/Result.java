@@ -22,6 +22,8 @@ public class Result implements Comparable<Result> {
 		this.result = result;
 		this.rank = rank;
 		matchesFor = new HashSet<Posting>();
+		if (matchesFor.size() == 0)
+			throw new RuntimeException("Why are you a result if you don't match for something!");
 		matchesFor.add(p);
 	}
 
