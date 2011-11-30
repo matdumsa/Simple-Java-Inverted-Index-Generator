@@ -8,19 +8,16 @@ import java.util.HashSet;
 public class Result implements Comparable<Result> {
 
 	private GenericDocument result;
-	private double rank;
 	private HashSet<Posting> matchesFor;
 	
-	public Result(GenericDocument result, double rank) {
+	public Result(GenericDocument result) {
 		super();
 		this.result = result;
-		this.rank = rank;
 	}
 
-	public Result(GenericDocument result, double rank, Posting p) {
+	public Result(GenericDocument result, Posting p) {
 		super();
 		this.result = result;
-		this.rank = rank;
 		matchesFor = new HashSet<Posting>();
 		if (matchesFor.size() == 0)
 			throw new RuntimeException("Why are you a result if you don't match for something!");
@@ -30,9 +27,6 @@ public class Result implements Comparable<Result> {
 	public GenericDocument getResult() {
 		return result;
 	}
-	public double getRank() {
-		return rank;
-	}
 	
 	
 	@Override
@@ -40,9 +34,7 @@ public class Result implements Comparable<Result> {
 	 * USed for insertion in a sorted array.. the better the result the first you are
 	 */
 	public int compareTo(Result other) {
-		if (other.rank == this.rank)
 			return  new Integer(this.result.getId()).compareTo(other.getResult().getId());
-		return Double.compare(other.rank,this.rank);
 	}
 
 	@Override

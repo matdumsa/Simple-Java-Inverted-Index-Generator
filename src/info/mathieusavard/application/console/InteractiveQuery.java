@@ -3,12 +3,15 @@ package info.mathieusavard.application.console;
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.index.spimi.GenerateIndex;
 import info.mathieusavard.domain.queryprocessor.QueryProcessor;
+import info.mathieusavard.domain.queryprocessor.RankedResult;
 import info.mathieusavard.domain.queryprocessor.Result;
+import info.mathieusavard.domain.queryprocessor.ResultSet;
 import info.mathieusavard.domain.queryprocessor.booleantree.InvalidQueryException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 public class InteractiveQuery {
 
@@ -22,8 +25,15 @@ public class InteractiveQuery {
 
 			@Override
 			public void printResult(Result r) {
-				System.out.print(r.getResult().getId() + " - " + r.getRank());
-				System.out.println("\t" + r.getResult().getTitle());						
+				if (r instanceof RankedResult){
+					RankedResult rR = (RankedResult)r;
+					System.out.print(rR.getResult().getId() + " - " + rR.getRank());
+					System.out.println("\t" + rR.getResult().getTitle());
+				} else
+				{
+					System.out.print(r.getResult().getId() + " - ");
+					System.out.println("\t" + r.getResult().getTitle());
+				}
 			}});
 
 		i.run();
@@ -68,8 +78,10 @@ public class InteractiveQuery {
 	}
 	private void performQuery(String query) {
 		//We buffer the query result not to load in memory 1000000 article is a generic query is used
+		ResultSet resultSet = null;
 		try {
-			if (QueryProcessor.performBufferedQuery(query) == false) {
+			resultSet = QueryProcessor.performBufferedQuery(query);
+			if ( resultSet == null) {
 				System.out.println("Not found");
 				return;
 			}
@@ -78,12 +90,13 @@ public class InteractiveQuery {
 			return;
 		}
 
-		System.out.println("I found " + QueryProcessor.size() + " results in " + QueryProcessor.getMatchingTime()/1000.0 + "seconds");
-		if (QueryProcessor.size() > MAX_RESULTS)
+		System.out.println("I found " + resultSet.size() + " results in " + QueryProcessor.getMatchingTime()/1000.0 + "seconds");
+		if (resultSet.size() > MAX_RESULTS)
 			System.out.println("showing the first " + MAX_RESULTS + " results");
 
-		while (QueryProcessor.hasNext()) {
-			Result r =  QueryProcessor.next();
+		Iterator<Result> iterator = resultSet.iterator();
+		while (iterator.hasNext()) {
+			Result r =  iterator.next();
 			GenericDocument a = r.getResult();
 			resultPrinter.printResult(r);
 		}

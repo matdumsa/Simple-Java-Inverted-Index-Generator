@@ -1,8 +1,6 @@
 package info.mathieusavard.domain.queryprocessor;
 
-import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
-import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.domain.index.IndexerThread;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.domain.queryprocessor.booleantree.InfixToPostfix;
@@ -12,22 +10,18 @@ import info.mathieusavard.domain.queryprocessor.booleantree.QueryTreeBuilder;
 import info.mathieusavard.technicalservices.BenchmarkRow;
 import info.mathieusavard.technicalservices.Property;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 public class QueryProcessor {
 
 	private static DefaultInvertedIndex index = DefaultInvertedIndex.readFromFile("index.txt");
 
 	private static Set<Posting> matchingDocId;
-	private static Iterator<Result> matchedIterator;
 	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
-
+	
 	private static String queryPositiveTerms;
 
 	public static long getMatchingTime() {
@@ -38,76 +32,24 @@ public class QueryProcessor {
 		return pullingArticletime.getDuration();
 	}
 
-	public static boolean performBufferedQuery(String query) throws InvalidQueryException {
+	public static ResultSet performBufferedQuery(String query) throws InvalidQueryException {
 		matchingDocId = findMatchingPostingId(query);
-		if (matchingDocId == null || matchingDocId.isEmpty() == true)
-			return false;
-		matchedIterator = generateRankResult(queryPositiveTerms, matchingDocId).iterator();
-		return true;
-	}
-
-	private static Collection<Result> generateRankResult(String queryPositiveTerms, Set<Posting> matchingDocument) {
-		if (Property.getBoolean("enable_ranking") == false) {
-			HashSet<Result> resultSet = new HashSet<Result>();
-			for (Posting p : matchingDocument) 
-				resultSet.add(new Result(CorpusFactory.getCorpus().findArticle(p.getDocumentId()), 1));
-			return resultSet;
-		}
-		else {
-			TreeSet<Result> results = new TreeSet<Result>();
-			// Looking to rank each document in regards to query positive terms.
-			for (Posting p : matchingDocument) {
-				Result result = makeRank(CorpusFactory.getCorpus().findArticle(p.getDocumentId()),queryPositiveTerms);
-				results.add(result);
-
+		ResultSet result;
+		if (!Property.getBoolean("rankedResult")){
+			if (matchingDocId == null)
+				return null;
+			else{
+				result = ResultSetFactory.createResultSet(false, query, matchingDocId);
 			}
-			System.out.println("Done ranking " +matchingDocument.size() +":"+ results.size() + " results");
-			return results;
 		}
-	}
-
-	//This methods applies Okapi BM25
-	private static Result makeRank(GenericDocument abstractDocument, String queryPositiveTerms) {
-		double N = CorpusFactory.getCorpus().size();	//corpus size
-		double k1 = 1.5;
-		double b = 0.75;
-		double avgDl = CorpusFactory.getCorpus().getTotalLength()/N;
-		double result =0;
-		for (String term : queryPositiveTerms.split(" ")) {
-			double numberOfDocumentContainingT = index.getSet(term).size();
-			double idfQI = Math.log((N - numberOfDocumentContainingT + 0.5)/(numberOfDocumentContainingT+0.5));
-			double termFrequencyInDocument = 0;
-			// Looking for termFrequencyInDocument
-			for (Posting p : index.getSet(term))
-				if (p.getDocumentId() == abstractDocument.getId())
-					termFrequencyInDocument = p.getOccurence();
-			
-			double top = termFrequencyInDocument*(k1+1);
-			double bottom = termFrequencyInDocument+k1*(1-b+b*(abstractDocument.getLengthInWords()/avgDl));
-			result += idfQI*(top/bottom);
+		else{
+			if (matchingDocId == null || matchingDocId.isEmpty() == true)
+				return null;
+			else{
+				result = ResultSetFactory.createResultSet(true, query, matchingDocId);
+			}
 		}
-		return new Result(abstractDocument, result);
-	}
-
-	public static boolean hasNext() {
-		return matchedIterator.hasNext();
-	}
-	
-	public static Result next() {
-		pullingArticletime.start();
-		Result a;
-		if (matchedIterator.hasNext())
-			a = matchedIterator.next();
-		else
-			a = null;
-		pullingArticletime.stop();
-		return a;
-	}
-
-	public static int size() {
-		if (matchingDocId == null)
-			return 0;
-		return matchingDocId.size();
+		return result;
 	}
 
 	private static String compressQuery(String query) {

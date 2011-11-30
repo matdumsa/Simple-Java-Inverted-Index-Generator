@@ -1,6 +1,7 @@
 package info.mathieusavard.application.web;
 
 import info.mathieusavard.domain.queryprocessor.QueryProcessor;
+import info.mathieusavard.domain.queryprocessor.ResultSet;
 import info.mathieusavard.domain.queryprocessor.booleantree.InvalidQueryException;
 
 import java.io.IOException;
@@ -20,13 +21,15 @@ public class CommandSearch extends Command {
 		request.setAttribute("query", query);
 		
 		System.out.println("searching for " + query);
+		ResultSet result = null;
 		try {
-			QueryProcessor.performBufferedQuery(query);
+			result = QueryProcessor.performBufferedQuery(query);
+			
 		} catch (InvalidQueryException e) {
 			throw new ServletException(e);
 		}
 		request.setAttribute("time-to-match", QueryProcessor.getMatchingTime());
-		request.setAttribute("result-count", QueryProcessor.size());
+		request.setAttribute("result-count", result.size());
 		
 		RequestDispatcher rd = request.getRequestDispatcher(super.getJSPPAth("search.jsp"));
 		rd.forward(request, response);
