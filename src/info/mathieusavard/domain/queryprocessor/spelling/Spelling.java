@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Spelling {
+public class Spelling {
 
 	private final HashMap<String, Integer> nWords = new HashMap<String, Integer>();
 
@@ -46,7 +46,7 @@ class Spelling {
 				System.out.println((new Spelling("big.txt")).correct(args[0]));
 		else {
 			Spelling s = new Spelling("big.txt");
-			System.out.println(s.correct("deliveree"));
+			System.out.println(s.correct("test"));
 		}
 			
 			

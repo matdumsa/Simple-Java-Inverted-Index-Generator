@@ -98,7 +98,7 @@ public class QueryProcessor {
 		}
 		return compressedQuery;
 	}
-	private static Set<Posting> findMatchingPostingId(String query) throws InvalidQueryException {
+	public static Set<Posting> findMatchingPostingId(String query) throws InvalidQueryException {
 		matchingTime = new BenchmarkRow(null);
 		matchingTime.start();
 		String compressedQuery = compressQuery(query);
