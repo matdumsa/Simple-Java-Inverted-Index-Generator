@@ -39,7 +39,7 @@ public class RankedResultSet extends ResultSet {
 		double result =0;
 		for (String term : rankAccordingToQuery.split(" ")) {
 			double numberOfDocumentContainingT = getIndex().getSet(term).size();
-			double idfQI = Math.log((N - numberOfDocumentContainingT + 0.5)/(numberOfDocumentContainingT+0.5));
+			double idfQI = Math.log((N - numberOfDocumentContainingT + 0.5)/(numberOfDocumentContainingT+0.5))/Math.log(10);
 			double termFrequencyInDocument = 0;
 			// Looking for termFrequencyInDocument
 			for (Posting p : getIndex().getSet(term))

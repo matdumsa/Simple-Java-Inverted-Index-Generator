@@ -21,7 +21,8 @@ public class QueryProcessor {
 	private static Set<Posting> matchingDocId;
 	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
-
+	private static IndexerThread queryCompressor = new IndexerThread("Query Compressor");
+	
 	private static String queryPositiveTerms;
 
 	public static long getMatchingTime() {
@@ -32,16 +33,19 @@ public class QueryProcessor {
 		return pullingArticletime.getDuration();
 	}
 
-	public static ResultSet performBufferedQuery(String query) throws InvalidQueryException {
-		return performBufferedQuery(query, 1);
+	public static ResultSet performQuery(String query) throws InvalidQueryException {
+		return performQuery(query, 1);
 	}
 
-	private static ResultSet performBufferedQuery(String query, int attempt) throws InvalidQueryException {
-		matchingDocId = findMatchingPostingId(query);
+	private static ResultSet performQuery(String query, int attempt) throws InvalidQueryException {
+		matchingDocId = findPostingForQuery(query);
+
 		if (matchingDocId.size() == 0) {
+			if (attempt > 2)
+				return null;
 			String newQuery = suggestNewQueryBySpellChecking(query);
 			System.out.println("Nothing was found for '" + query + "', Ill search for '" + newQuery + "' instead");
-				performBufferedQuery(newQuery, attempt++);
+				performQuery(newQuery, attempt++);
 		}
 
 		ResultSet result;
@@ -54,6 +58,11 @@ public class QueryProcessor {
 		return result;
 	}
 
+	/**
+	 * Takes a user input query and compress it the way the corpus is compressed at indexation time
+	 * @param query
+	 * @return
+	 */
 	private static String compressQuery(String query) {
 		query = query.trim();
 
@@ -88,7 +97,6 @@ public class QueryProcessor {
 			//Setting the default boolean operator between words to AND
 			query = query.replace(" ", "^");
 
-		IndexerThread tt = new IndexerThread("Query compressor");
 		StringTokenizer st = new StringTokenizer(query,"^-+()", true);
 		String compressedQuery = "";
 		while (st.hasMoreTokens()) {	
@@ -96,11 +104,12 @@ public class QueryProcessor {
 			if (token.equals("^") || token.equals("-") || token.equals("+") || token.equals("(") || token.equals(")"))
 				compressedQuery = compressedQuery+token;
 			else
-				compressedQuery = compressedQuery+tt.compressToken(token);
+				compressedQuery = compressedQuery+queryCompressor.compressToken(token);
 		}
 		return compressedQuery;
 	}
-	public static Set<Posting> findMatchingPostingId(String query) throws InvalidQueryException {
+	
+	public static Set<Posting> findPostingForQuery(String query) throws InvalidQueryException {
 		matchingTime = new BenchmarkRow(null);
 		matchingTime.start();
 		String compressedQuery = compressQuery(query);
@@ -114,9 +123,6 @@ public class QueryProcessor {
 		return resultSet;
 	}
 
-	public static DefaultInvertedIndex getIndex() {
-		return index;
-	}
 
 	private static String suggestNewQueryBySpellChecking(String originalQuery){
 		String[] words = originalQuery.split(" ");
@@ -132,6 +138,5 @@ public class QueryProcessor {
 		}
 		return result;
 	}
-	
 
 }

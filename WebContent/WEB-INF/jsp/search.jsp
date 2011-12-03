@@ -15,17 +15,17 @@
 	<c:choose>
 		<c:when test="${resultcount == 0}">
 			<h2>
-				Sorry, no results have been found for
-				<%=request.getAttribute("query")%></h2>
+				Sorry, no results have been found for ${query}
+			</h2>
 		</c:when>
 		<c:otherwise>
 
 	I found ${resultcount } results in${timetomatch} ms.
 
-	<c:forEach var="r" items="${result.results}">
+	<c:forEach var="r" items="${resultset.results}">
 				<h3>
-					<a href="document/view/?d=${r.result.id }&q=${query}">
-						${r.result.title} </a>
+					<a href="document/view/?d=${r.document.id }&q=${query}">
+						${r.document.title} </a>
 				</h3>
 			</c:forEach>
 		</c:otherwise>

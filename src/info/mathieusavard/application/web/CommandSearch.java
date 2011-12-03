@@ -21,16 +21,16 @@ public class CommandSearch extends Command {
 		request.setAttribute("query", query);
 		
 		System.out.println("searching for " + query);
-		ResultSet result = null;
+		ResultSet resultset = null;
 		try {
-			result = QueryProcessor.performBufferedQuery(query);
+			resultset = QueryProcessor.performQuery(query);
 			
 		} catch (InvalidQueryException e) {
 			throw new ServletException(e);
 		}
 		request.setAttribute("timetomatch", QueryProcessor.getMatchingTime());
-		request.setAttribute("resultcount", result.size());
-		request.setAttribute("result", result);
+		request.setAttribute("resultcount", resultset.size());
+		request.setAttribute("resultset", resultset);
 		
 		RequestDispatcher rd = request.getRequestDispatcher(super.getJSPPAth("search.jsp"));
 		rd.forward(request, response);

@@ -26,12 +26,12 @@ public class InteractiveQuery {
 			public void printResult(Result r) {
 				if (r instanceof RankedResult){
 					RankedResult rR = (RankedResult)r;
-					System.out.print(rR.getResult().getId() + " - " + rR.getRank());
-					System.out.println("\t" + rR.getResult().getTitle());
+					System.out.print(rR.getDocument().getId() + " - " + rR.getRank());
+					System.out.println("\t" + rR.getDocument().getTitle());
 				} else
 				{
-					System.out.print(r.getResult().getId() + " - ");
-					System.out.println("\t" + r.getResult().getTitle());
+					System.out.print(r.getDocument().getId() + " - ");
+					System.out.println("\t" + r.getDocument().getTitle());
 				}
 			}});
 
@@ -64,8 +64,6 @@ public class InteractiveQuery {
 			if (query.equals("index")) {
 				GenerateIndex.main(new String[] {});
 			}
-			else if (query.equals("getDocumentBasedIndex"))
-				QueryProcessor.getIndex().getDocumentBasedIndex();
 			else if (!(query.equals("quit"))){
 				performQuery(query);
 			}
@@ -79,7 +77,7 @@ public class InteractiveQuery {
 		//We buffer the query result not to load in memory 1000000 article is a generic query is used
 		ResultSet resultSet = null;
 		try {
-			resultSet = QueryProcessor.performBufferedQuery(query);
+			resultSet = QueryProcessor.performQuery(query);
 			if ( resultSet == null) {
 				System.out.println("Not found");
 				return;
