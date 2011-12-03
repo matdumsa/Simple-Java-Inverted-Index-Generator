@@ -1,6 +1,5 @@
 package info.mathieusavard.application.console;
 
-import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.index.spimi.GenerateIndex;
 import info.mathieusavard.domain.queryprocessor.QueryProcessor;
 import info.mathieusavard.domain.queryprocessor.RankedResult;
@@ -97,7 +96,6 @@ public class InteractiveQuery {
 		Iterator<Result> iterator = resultSet.iterator();
 		while (iterator.hasNext()) {
 			Result r =  iterator.next();
-			GenericDocument a = r.getResult();
 			resultPrinter.printResult(r);
 		}
 

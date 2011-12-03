@@ -28,8 +28,9 @@ public class CommandSearch extends Command {
 		} catch (InvalidQueryException e) {
 			throw new ServletException(e);
 		}
-		request.setAttribute("time-to-match", QueryProcessor.getMatchingTime());
-		request.setAttribute("result-count", result.size());
+		request.setAttribute("timetomatch", QueryProcessor.getMatchingTime());
+		request.setAttribute("resultcount", result.size());
+		request.setAttribute("result", result);
 		
 		RequestDispatcher rd = request.getRequestDispatcher(super.getJSPPAth("search.jsp"));
 		rd.forward(request, response);

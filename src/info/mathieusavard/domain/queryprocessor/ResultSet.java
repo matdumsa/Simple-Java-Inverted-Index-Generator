@@ -2,6 +2,7 @@ package info.mathieusavard.domain.queryprocessor;
 
 import info.mathieusavard.domain.Posting;
 import info.mathieusavard.domain.corpus.CorpusFactory;
+import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.domain.queryprocessor.spelling.Spelling;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class ResultSet implements Iterable<Result>{
 	private String userInputQuery = null;
 	private String suggestedQuery = null;
 	private String compressedQuery = null;
+	private DefaultInvertedIndex index;
 	// clusters /Êclasses blabla for future use
 
 	public String getCompressedQuery() {
@@ -25,51 +27,41 @@ public class ResultSet implements Iterable<Result>{
 	public String getUserInputQuery() {
 		return userInputQuery;
 	}
-	
-	public ResultSet(String userInputQuery, String compressedInputQuery ,Collection<Posting> results) {
+
+	protected DefaultInvertedIndex getIndex() {
+		return index;
+	}
+
+	public ResultSet(DefaultInvertedIndex index, String userInputQuery, String compressedInputQuery ,Collection<Posting> results) {
 		super();
+		this.index = index;
 		this.userInputQuery = userInputQuery;
 		this.compressedQuery = compressedInputQuery;
-		if (results.size()==0) {
-			suggestedQuery = createSuggestedQuery(userInputQuery);
-		} else{
-			this.results = new LinkedList<Result>();
-			this.results.addAll(generateResult(results));
-		}
+		this.results = new LinkedList<Result>();
+		this.results.addAll(generateResult(results));
 	}
-	
-	private String createSuggestedQuery(String originalQuery){
-		String[] words = originalQuery.split(" ");
-		String result = "";
-		Spelling spell;
-		try {
-			spell = new Spelling("big.txt");
-			for (int i = 0; i < words.length; i++){
-				result = result + spell.correct(words[i])  + " ";
-			}
-			this.results = generateResult(QueryProcessor.findMatchingPostingId(result));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-	
+
+
 	private static Collection<Result> generateResult(Collection<Posting> matchingDocument) {
-			HashSet<Result> resultSet = new HashSet<Result>();
-			for (Posting p : matchingDocument) 
-				resultSet.add(new Result(CorpusFactory.getCorpus().findArticle(p.getDocumentId())));
-			return resultSet;
+		HashSet<Result> resultSet = new HashSet<Result>();
+		for (Posting p : matchingDocument) 
+			resultSet.add(new Result(CorpusFactory.getCorpus().findArticle(p.getDocumentId())));
+		return resultSet;
 	}
-	
+
 	public String getSuggestedQuery() {
 		return suggestedQuery;
+	}
+
+	public Collection<Result> getResults() {
+		return this.results;
 	}
 
 	@Override
 	public Iterator<Result> iterator() {
 		return results.iterator();
 	}
-	
+
 	public int size() {
 		if (results == null){
 			return 0;

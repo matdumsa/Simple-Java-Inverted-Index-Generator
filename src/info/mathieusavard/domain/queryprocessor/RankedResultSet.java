@@ -10,18 +10,19 @@ import java.util.TreeSet;
 
 public class RankedResultSet extends ResultSet {
 
-	private static DefaultInvertedIndex index = DefaultInvertedIndex.readFromFile("index.txt");
+	private String rankAccordingToQuery;
 	
-	public RankedResultSet(String userInputQuery, String compressedInputQuery,Collection<Posting> results) {
-		super(userInputQuery, compressedInputQuery, results);
+	public RankedResultSet(DefaultInvertedIndex index, String userInputQuery, String compressedInputQuery,String rankAccordingToQuery, Collection<Posting> results) {
+		super(index, userInputQuery, compressedInputQuery, results);
+		this.rankAccordingToQuery = rankAccordingToQuery;
 		super.results = generateResult(compressedInputQuery, results); //Here we should assign a RANKED LIST to super.results.
 	}
 	
-	private static Collection<Result> generateResult(String queryPositiveTerms, Collection<Posting> matchingDocument) {
+	private Collection<Result> generateResult(String queryPositiveTerms, Collection<Posting> matchingDocument) {
 			TreeSet<Result> results = new TreeSet<Result>();
 			// Looking to rank each document in regards to query positive terms.
 			for (Posting p : matchingDocument) {
-				RankedResult result = makeRank(CorpusFactory.getCorpus().findArticle(p.getDocumentId()),queryPositiveTerms);
+				RankedResult result = makeRank(CorpusFactory.getCorpus().findArticle(p.getDocumentId()));
 				results.add(result);
 
 			}
@@ -30,26 +31,23 @@ public class RankedResultSet extends ResultSet {
 	}
 
 	//This methods applies Okapi BM25
-	private static RankedResult makeRank(GenericDocument abstractDocument, String queryPositiveTerms) {
+	private RankedResult makeRank(GenericDocument abstractDocument) {
 		double N = CorpusFactory.getCorpus().size();	//corpus size
 		double k1 = 1.5;
 		double b = 0.75;
 		double avgDl = CorpusFactory.getCorpus().getTotalLength()/N;
 		double result =0;
-		for (String term : queryPositiveTerms.split(" ")) {
-			double numberOfDocumentContainingT = index.getSet(term).size();
+		for (String term : rankAccordingToQuery.split(" ")) {
+			double numberOfDocumentContainingT = getIndex().getSet(term).size();
 			double idfQI = Math.log((N - numberOfDocumentContainingT + 0.5)/(numberOfDocumentContainingT+0.5));
 			double termFrequencyInDocument = 0;
 			// Looking for termFrequencyInDocument
-			for (Posting p : index.getSet(term))
+			for (Posting p : getIndex().getSet(term))
 				if (p.getDocumentId() == abstractDocument.getId()){
 					termFrequencyInDocument = p.getOccurence();
 				}
 			double top = termFrequencyInDocument*(k1+1);
 			double bottom = termFrequencyInDocument+k1*(1-b+b*(abstractDocument.getLengthInWords()/avgDl));
-			System.out.println("Fuck : " + idfQI );
-			System.out.println("Fuck2 : " + top);
-			System.out.println("Fuck3 : " + bottom);
 			result += idfQI*(top/bottom);
 		}
 		return new RankedResult(abstractDocument, result);

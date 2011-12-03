@@ -7,10 +7,10 @@ import info.mathieusavard.domain.queryprocessor.booleantree.InfixToPostfix;
 import info.mathieusavard.domain.queryprocessor.booleantree.InvalidQueryException;
 import info.mathieusavard.domain.queryprocessor.booleantree.QueryTree;
 import info.mathieusavard.domain.queryprocessor.booleantree.QueryTreeBuilder;
+import info.mathieusavard.domain.queryprocessor.spelling.Spelling;
 import info.mathieusavard.technicalservices.BenchmarkRow;
 import info.mathieusavard.technicalservices.Property;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -21,7 +21,7 @@ public class QueryProcessor {
 	private static Set<Posting> matchingDocId;
 	private static BenchmarkRow matchingTime;
 	private static BenchmarkRow pullingArticletime = new BenchmarkRow(null);
-	
+
 	private static String queryPositiveTerms;
 
 	public static long getMatchingTime() {
@@ -33,28 +33,30 @@ public class QueryProcessor {
 	}
 
 	public static ResultSet performBufferedQuery(String query) throws InvalidQueryException {
+		return performBufferedQuery(query, 1);
+	}
+
+	private static ResultSet performBufferedQuery(String query, int attempt) throws InvalidQueryException {
 		matchingDocId = findMatchingPostingId(query);
+		if (matchingDocId.size() == 0) {
+			String newQuery = suggestNewQueryBySpellChecking(query);
+			System.out.println("Nothing was found for '" + query + "', Ill search for '" + newQuery + "' instead");
+				performBufferedQuery(newQuery, attempt++);
+		}
+
 		ResultSet result;
-		if (!Property.getBoolean("enable_ranking")){
-			if (matchingDocId == null)
-				return null;
-			else{
-				result = ResultSetFactory.createResultSet(false, query, compressQuery(query),matchingDocId);
-			}
+		if (Property.getBoolean("enable_ranking")){
+			result = ResultSetFactory.createResultSet(index, query,compressQuery(query), queryPositiveTerms, matchingDocId);
 		}
 		else{
-			if (matchingDocId == null || matchingDocId.isEmpty() == true)
-				return null;
-			else{
-				result = ResultSetFactory.createResultSet(true, query,compressQuery(query), matchingDocId);
-			}
+			result = ResultSetFactory.createResultSet(index, query, compressQuery(query),matchingDocId);
 		}
 		return result;
 	}
 
 	private static String compressQuery(String query) {
 		query = query.trim();
-		
+
 		query = query.replace("( ", "(");
 		query = query.replace(" )", ")");
 		query = query.replace(" NOT", " not");
@@ -108,6 +110,7 @@ public class QueryProcessor {
 		Set<Posting> resultSet = qt.getResult(index);
 		queryPositiveTerms = qt.getAllMatchedTerms();
 		matchingTime.stop();
+		
 		return resultSet;
 	}
 
@@ -115,5 +118,20 @@ public class QueryProcessor {
 		return index;
 	}
 
+	private static String suggestNewQueryBySpellChecking(String originalQuery){
+		String[] words = originalQuery.split(" ");
+		String result = "";
+		Spelling spell;
+		try {
+			spell = new Spelling("big.txt");
+			for (int i = 0; i < words.length; i++){
+				result = result + spell.correct(words[i])  + " ";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 
 }
