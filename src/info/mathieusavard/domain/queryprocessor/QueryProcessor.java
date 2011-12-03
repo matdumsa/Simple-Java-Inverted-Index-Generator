@@ -39,14 +39,14 @@ public class QueryProcessor {
 			if (matchingDocId == null)
 				return null;
 			else{
-				result = ResultSetFactory.createResultSet(false, query, matchingDocId);
+				result = ResultSetFactory.createResultSet(false, query, compressQuery(query),matchingDocId);
 			}
 		}
 		else{
 			if (matchingDocId == null || matchingDocId.isEmpty() == true)
 				return null;
 			else{
-				result = ResultSetFactory.createResultSet(true, query, matchingDocId);
+				result = ResultSetFactory.createResultSet(true, query,compressQuery(query), matchingDocId);
 			}
 		}
 		return result;

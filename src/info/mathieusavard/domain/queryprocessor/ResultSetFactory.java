@@ -6,11 +6,11 @@ import java.util.Collection;
 
 public class ResultSetFactory {
 
-	public static ResultSet createResultSet(boolean ranked, String userInputQuery, Collection<Posting> results) {
+	public static ResultSet createResultSet(boolean ranked, String userInputQuery, String compressedInputQuery, Collection<Posting> results) {
 		if (ranked) 
-			return new RankedResultSet(userInputQuery,  results);
+			return new RankedResultSet(userInputQuery,compressedInputQuery,  results);
 		else
-			return new ResultSet(userInputQuery, results);
+			return new ResultSet(userInputQuery,compressedInputQuery, results);
 	}
 	
 	

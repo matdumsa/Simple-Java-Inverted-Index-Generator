@@ -15,15 +15,21 @@ public class ResultSet implements Iterable<Result>{
 	Collection<Result> results = null;
 	private String userInputQuery = null;
 	private String suggestedQuery = null;
+	private String compressedQuery = null;
 	// clusters /Êclasses blabla for future use
+
+	public String getCompressedQuery() {
+		return compressedQuery;
+	}
 
 	public String getUserInputQuery() {
 		return userInputQuery;
 	}
 	
-	public ResultSet(String userInputQuery, Collection<Posting> results) {
+	public ResultSet(String userInputQuery, String compressedInputQuery ,Collection<Posting> results) {
 		super();
 		this.userInputQuery = userInputQuery;
+		this.compressedQuery = compressedInputQuery;
 		if (results.size()==0) {
 			suggestedQuery = createSuggestedQuery(userInputQuery);
 		} else{

@@ -12,9 +12,9 @@ public class RankedResultSet extends ResultSet {
 
 	private static DefaultInvertedIndex index = DefaultInvertedIndex.readFromFile("index.txt");
 	
-	public RankedResultSet(String userInputQuery, Collection<Posting> results) {
-		super(userInputQuery, results);
-		super.results = generateResult(userInputQuery, results); //Here we should assign a RANKED LIST to super.results.
+	public RankedResultSet(String userInputQuery, String compressedInputQuery,Collection<Posting> results) {
+		super(userInputQuery, compressedInputQuery, results);
+		super.results = generateResult(compressedInputQuery, results); //Here we should assign a RANKED LIST to super.results.
 	}
 	
 	private static Collection<Result> generateResult(String queryPositiveTerms, Collection<Posting> matchingDocument) {
@@ -47,6 +47,9 @@ public class RankedResultSet extends ResultSet {
 				}
 			double top = termFrequencyInDocument*(k1+1);
 			double bottom = termFrequencyInDocument+k1*(1-b+b*(abstractDocument.getLengthInWords()/avgDl));
+			System.out.println("Fuck : " + idfQI );
+			System.out.println("Fuck2 : " + top);
+			System.out.println("Fuck3 : " + bottom);
 			result += idfQI*(top/bottom);
 		}
 		return new RankedResult(abstractDocument, result);
