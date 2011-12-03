@@ -14,7 +14,6 @@ public class RankedResultSet extends ResultSet {
 	
 	public RankedResultSet(String userInputQuery, Collection<Posting> results) {
 		super(userInputQuery, results);
-		//if (results.size()==0) suggestedQuery
 		super.results = generateResult(userInputQuery, results); //Here we should assign a RANKED LIST to super.results.
 	}
 	
@@ -43,9 +42,9 @@ public class RankedResultSet extends ResultSet {
 			double termFrequencyInDocument = 0;
 			// Looking for termFrequencyInDocument
 			for (Posting p : index.getSet(term))
-				if (p.getDocumentId() == abstractDocument.getId())
+				if (p.getDocumentId() == abstractDocument.getId()){
 					termFrequencyInDocument = p.getOccurence();
-			
+				}
 			double top = termFrequencyInDocument*(k1+1);
 			double bottom = termFrequencyInDocument+k1*(1-b+b*(abstractDocument.getLengthInWords()/avgDl));
 			result += idfQI*(top/bottom);

@@ -35,7 +35,7 @@ public class QueryProcessor {
 	public static ResultSet performBufferedQuery(String query) throws InvalidQueryException {
 		matchingDocId = findMatchingPostingId(query);
 		ResultSet result;
-		if (!Property.getBoolean("rankedResult")){
+		if (!Property.getBoolean("enable_ranking")){
 			if (matchingDocId == null)
 				return null;
 			else{
