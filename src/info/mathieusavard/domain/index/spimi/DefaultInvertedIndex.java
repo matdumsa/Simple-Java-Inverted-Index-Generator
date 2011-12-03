@@ -114,6 +114,8 @@ public class DefaultInvertedIndex implements IInvertedIndex {
 	 * @return the number of distinct document posessing that term at least once
 	 */
 	public int getIDFScore(String term) {
+		if (map.containsKey(term) == false)
+			return 0;
 		return map.get(term).size();
 	}
 

@@ -123,7 +123,7 @@ public class QueryProcessor {
 		String result = "";
 		Spelling spell;
 		try {
-			spell = new Spelling("big.txt");
+			spell = new Spelling(index);
 			for (int i = 0; i < words.length; i++){
 				result = result + spell.correct(words[i])  + " ";
 			}

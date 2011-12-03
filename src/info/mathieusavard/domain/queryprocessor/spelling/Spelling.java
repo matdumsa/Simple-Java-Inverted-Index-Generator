@@ -1,25 +1,17 @@
 package info.mathieusavard.domain.queryprocessor.spelling;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Spelling {
 
-	private final HashMap<String, Integer> nWords = new HashMap<String, Integer>();
-
-	public Spelling(String file) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		Pattern p = Pattern.compile("\\w+");
-		for(String temp = ""; temp != null; temp = in.readLine()){
-			Matcher m = p.matcher(temp.toLowerCase());
-			while(m.find()) nWords.put((temp = m.group()), nWords.containsKey(temp) ? nWords.get(temp) + 1 : 1);
-		}
-		in.close();
+	private DefaultInvertedIndex index;
+	
+	public Spelling(DefaultInvertedIndex index) throws IOException {
+		this.index = index;
 	}
 
 	private final ArrayList<String> edits(String word) {
@@ -32,25 +24,15 @@ public class Spelling {
 	}
 
 	public final String correct(String word) {
-		if(nWords.containsKey(word)) return word;
+		if(index.getIDFScore(word) > 0) return word;
 		ArrayList<String> list = edits(word);
 		HashMap<Integer, String> candidates = new HashMap<Integer, String>();
-		for(String s : list) if(nWords.containsKey(s)) candidates.put(nWords.get(s),s);
+		for(String s : list) if(index.getIDFScore(s) > 0) candidates.put(index.getIDFScore(s),s);
 		if(candidates.size() > 0) return candidates.get(Collections.max(candidates.keySet()));
-		for(String s : list) for(String w : edits(s)) if(nWords.containsKey(w)) candidates.put(nWords.get(w),w);
+		for(String s : list) for(String w : edits(s)) if(index.getIDFScore(w) > 0) candidates.put(index.getIDFScore(w),w);
 		return candidates.size() > 0 ? candidates.get(Collections.max(candidates.keySet())) : word;
 	}
 
-	public static void main(String args[]) throws IOException {
-		if(args.length > 0)
-				System.out.println((new Spelling("big.txt")).correct(args[0]));
-		else {
-			Spelling s = new Spelling("big.txt");
-			System.out.println(s.correct("test"));
-		}
-			
-			
-	}
 
 	
 }
