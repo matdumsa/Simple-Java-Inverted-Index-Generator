@@ -24,7 +24,8 @@ public class KMeansClustering {
 	private int NUMBER_OF_THREAD = Runtime.getRuntime().availableProcessors();;
 
 	public KMeansClustering(Corpus corpus, DefaultInvertedIndex index) {
-//		int k = findOptimalNumberOfClusters(corpus, index);
+		k = findOptimalNumberOfClusters(corpus, index);
+		k=15;
 		this.index = index;
 		System.out.println("Clustering started for " + k + " clusters");
 		for (int x=0; x< k; x++)
@@ -55,7 +56,7 @@ public class KMeansClustering {
 		while (docList.isEmpty() == false) {
 			WeightedDocument document = docList.poll();
 			if (document.getVector() != null) {
-	 			clusterList.get((int) (Math.random()*5)).addDocument(document);
+	 			clusterList.get((int) (Math.random()*k)).addDocument(document);
 	 			ClusteringTask task = new ClusteringTask(document, clusterList);
 	 			clusteringTask.add(task);
 			}
@@ -91,5 +92,9 @@ public class KMeansClustering {
 		int n = i.size();
 		int t = i.getAll().size();
 		return (m*n)/t;
+	}
+
+	public int getClusterCount() {
+		return k;
 	}
 }

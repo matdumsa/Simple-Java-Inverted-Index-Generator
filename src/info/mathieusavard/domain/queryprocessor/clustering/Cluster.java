@@ -28,7 +28,7 @@ public class Cluster {
 		return members.pollFirst();
 	}
 
-	public void addDocument(WeightedDocument d) {
+	public synchronized void addDocument(WeightedDocument d) {
 		members.add(d);
 	}
 

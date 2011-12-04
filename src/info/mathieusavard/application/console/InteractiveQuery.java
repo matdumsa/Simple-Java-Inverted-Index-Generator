@@ -72,7 +72,7 @@ public class InteractiveQuery {
 				clustering.performClustering();
 				
 				
-				for (int x=0; x<8; x++) {
+				for (int x=0; x<clustering.getClusterCount(); x++) {
 					System.out.println("Printing for cluster " + x);
 					for (WeightedDocument d : clustering.peekAtClusters(x, 10)) {
 						resultPrinter.printResult(new Result(d));
