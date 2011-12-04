@@ -1,36 +1,26 @@
 package info.mathieusavard.domain;
 
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
-import info.mathieusavard.technicalservices.Pair;
 
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public class ThreadTFIDF extends Thread {
+public class TaskComputeTFIDF implements Runnable {
 
-	private LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo;
 	private DefaultInvertedIndex index;
 	private double corpusSize = 0;
+	private LinkedList<Posting> postingList;
+	private WeightedDocument document;
 
-	public ThreadTFIDF (LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo, DefaultInvertedIndex d, int corpusSize){
-		this.workToDo = workToDo;
+	public TaskComputeTFIDF (WeightedDocument document, LinkedList<Posting> postingList, DefaultInvertedIndex d, int corpusSize){
+		this.document = document;
+		this.postingList = postingList;
 		this.index = d;
 		this.corpusSize = (double) corpusSize;
 	}
 
-
-
+	@Override
 	public void run(){
-		while (workToDo.size() > 0) {
-			Pair<GenericDocument, LinkedList<Posting>> pair;
-			try {
-				pair = workToDo.take();
-				WeightedDocument wd = (WeightedDocument) pair.getFirst();
-				wd.setVector(getTFIDFVector(pair.getSecond()));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		document.setVector(getTFIDFVector(postingList));
 	}
 
 	private VectorTermSpace getTFIDFVector(LinkedList<Posting> linkedList) {

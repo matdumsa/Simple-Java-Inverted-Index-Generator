@@ -2,15 +2,15 @@ package info.mathieusavard.domain.corpus;
 
 import info.mathieusavard.domain.GenericDocument;
 import info.mathieusavard.domain.Posting;
-import info.mathieusavard.domain.ThreadTFIDF;
+import info.mathieusavard.domain.TaskComputeTFIDF;
+import info.mathieusavard.domain.WeightedDocument;
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 import info.mathieusavard.technicalservices.BenchmarkRow;
-import info.mathieusavard.technicalservices.Pair;
 
 import java.util.LinkedList;
-import java.util.Stack;
 import java.util.TreeMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 
@@ -21,8 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class WeightedCorpus extends Corpus {
 	
 	private DefaultInvertedIndex index;  
-	private Stack<ThreadTFIDF> pool = new Stack<ThreadTFIDF>();
-	private int NUMBER_OF_THREAD = 4;
+	private int NUMBER_OF_THREAD = Runtime.getRuntime().availableProcessors();;
 	//Default constructor allow only the factory in this package to create instances
 	public WeightedCorpus() {
 		super();
@@ -35,7 +34,7 @@ public class WeightedCorpus extends Corpus {
 	}
 
 	private void computeTFIDFVector() {
-		BenchmarkRow bench = new BenchmarkRow("Generating TFIFD");
+		BenchmarkRow bench = new BenchmarkRow("Generating TFIFD with " + NUMBER_OF_THREAD + " workers");
 		bench.start();
 		
 		index = DefaultInvertedIndex.readFromFile("index.txt");
@@ -43,26 +42,17 @@ public class WeightedCorpus extends Corpus {
 			throw new RuntimeException("Invalid index, cannot compute TFIDF on an invalid index");
 		TreeMap<GenericDocument, LinkedList<Posting>> data = index.getDocumentBasedIndex();
 		System.out.println("Starting TF-IDF computing");
-		LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>> workToDo = new LinkedBlockingQueue<Pair<GenericDocument, LinkedList<Posting>>>();
 		
+		ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREAD);
 		for (GenericDocument gd : data.keySet()) {
-			Pair<GenericDocument, LinkedList<Posting>> pair = new Pair<GenericDocument, LinkedList<Posting>>(gd, data.get(gd));
-			workToDo.add(pair);
+			WeightedDocument document = (WeightedDocument) gd;
+			LinkedList<Posting> postingList = data.get(gd);
+			executor.submit(new TaskComputeTFIDF(document, postingList, index, super.size()));
 		}
 		
-		for (int i = 0; i < NUMBER_OF_THREAD; i++){
-			ThreadTFIDF thread = new ThreadTFIDF(workToDo, index, this.size());
-			pool.add(thread);
-			thread.start();
-		}
-		for (ThreadTFIDF t : pool){
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		executor.shutdown();
+		
+
 		System.out.println("Computing TF-IDF finished");
 		bench.stop();
 		System.out.println(bench.toString());
