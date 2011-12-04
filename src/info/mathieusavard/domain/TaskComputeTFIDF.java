@@ -2,6 +2,7 @@ package info.mathieusavard.domain;
 
 import info.mathieusavard.domain.index.spimi.DefaultInvertedIndex;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class TaskComputeTFIDF implements Runnable {
@@ -10,12 +11,14 @@ public class TaskComputeTFIDF implements Runnable {
 	private double corpusSize = 0;
 	private LinkedList<Posting> postingList;
 	private WeightedDocument document;
+	private HashMap<String, Integer> mapTermToId;
 
-	public TaskComputeTFIDF (WeightedDocument document, LinkedList<Posting> postingList, DefaultInvertedIndex d, int corpusSize){
+	public TaskComputeTFIDF (WeightedDocument document, LinkedList<Posting> postingList, DefaultInvertedIndex d, int corpusSize, HashMap<String, Integer> mapTermToId){
 		this.document = document;
 		this.postingList = postingList;
 		this.index = d;
 		this.corpusSize = (double) corpusSize;
+		this.mapTermToId = mapTermToId;
 	}
 
 	@Override
@@ -27,7 +30,7 @@ public class TaskComputeTFIDF implements Runnable {
 		VectorTermSpace vector = new VectorTermSpace();
 		if (linkedList != null){
 			for (Posting p : linkedList){
-				vector.getVector().put(p.getTerm(), computeTFIDFScore(p));
+				vector.getVector().put(mapTermToId.get(p.getTerm()), computeTFIDFScore(p));
 			}
 		} 
 		return vector;

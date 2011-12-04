@@ -6,50 +6,50 @@ import java.util.TreeMap;
 
 public class VectorTermSpace {
 
-	private Map<String, Double> vector;
+	private Map<Integer, Double> vector;
 
 
 	public VectorTermSpace() {
-		vector = new TreeMap<String, Double>();
+		vector = new TreeMap<Integer, Double>();
 	}
 
-	private VectorTermSpace(Map<String, Double> vector) {
+	private VectorTermSpace(Map<Integer, Double> vector) {
 		this.vector = vector;
 	}
 
-	public Map<String, Double> getVector() {
+	public Map<Integer, Double> getVector() {
 		return vector;
 	}
 
-	public void setVector(Map<String, Double> vector) {
+	public void setVector(Map<Integer, Double> vector) {
 		this.vector = vector;
 	}
 
 	public VectorTermSpace add(VectorTermSpace b) {
-		Map<String, Double> result = new HashMap<String, Double>(vector);
-		for (String s : b.vector.keySet()) {
-			Double d = this.vector.get(s);
+		Map<Integer, Double> result = new HashMap<Integer, Double>(vector);
+		for (Integer i : b.vector.keySet()) {
+			Double d = this.vector.get(i);
 			if (d == null)
 				d = 0.0;
-			d+=b.vector.get(s);
-			result.put(s, d);
+			d+=b.vector.get(i);
+			result.put(i, d);
 		}
 		return new VectorTermSpace(result);
 
 	}
 
 	public void divideBy(Double n) {
-		for (String s : vector.keySet()) {
-			vector.put(s, vector.get(s)/n);
+		for (Integer i : vector.keySet()) {
+			vector.put(i, vector.get(i)/n);
 		}
 	}
 
 	public Double getDistanceFromVector(VectorTermSpace v) {
 		Double distance = 0.0;
-		for (String s :  this.vector.keySet()) {
-			Double x1 = this.vector.get(s);
-			if (v.vector.containsKey(s)) {
-				Double x2 = v.vector.get(s);
+		for (Integer i :  this.vector.keySet()) {
+			Double x1 = this.vector.get(i);
+			if (v.vector.containsKey(i)) {
+				Double x2 = v.vector.get(i);
 				distance += Math.pow(x1-x2,2);
 			} else {
 				distance += Math.pow(x1,2);
@@ -57,7 +57,7 @@ public class VectorTermSpace {
 			}
 		}
 
-		for (String onlyInSecondOne : v.vector.keySet()) {
+		for (Integer onlyInSecondOne : v.vector.keySet()) {
 			if (this.vector.containsKey(onlyInSecondOne) == false) {
 				Double x1 = v.vector.get(onlyInSecondOne);
 				distance += Math.pow(x1,2);
@@ -75,9 +75,9 @@ public class VectorTermSpace {
 			if (v.getVector().size()!=this.vector.size()){
 				return false;
 			} else {
-				for (String s : vector.keySet()){
-					for (String s2 : v.getVector().keySet()){
-						if (!s.equals(s2) || v.getVector().get(s2)!=this.vector.get(s)){
+				for (Integer i : vector.keySet()){
+					for (Integer i2 : v.getVector().keySet()){
+						if (!i.equals(i2) || v.getVector().get(i2)!=this.vector.get(i)){
 							return false;
 						}
 					}

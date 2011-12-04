@@ -8,17 +8,25 @@ import info.mathieusavard.technicalservices.BenchmarkRow;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import net.sf.javaml.clustering.KMeans;
+import net.sf.javaml.core.DefaultDataset;
+import net.sf.javaml.core.SparseInstance;
 
 public class KMeansClustering {
 
 	private static final int NUMBER_OF_PASS = 5;
 	private LinkedList<WeightedDocument> docList = new LinkedList<WeightedDocument>();
 	private List<Cluster> clusterList = new ArrayList<Cluster>();
-
+	private int k = 8;
+	private DefaultInvertedIndex index;
+	
 	public KMeansClustering(Corpus corpus, DefaultInvertedIndex index) {
-		int k = findOptimalNumberOfClusters(corpus, index);
+//		int k = findOptimalNumberOfClusters(corpus, index);
+		this.index = index;
 		System.out.println("Clustering started for " + k + " clusters");
 		for (int x=0; x< k; x++)
 			clusterList.add(new Cluster("Cluster " + x));
@@ -34,30 +42,33 @@ public class KMeansClustering {
 	public void performClustering() {
 		BenchmarkRow clusteringBenchmark = new BenchmarkRow("Clustering");
 		clusteringBenchmark.start();
-		System.out.println("Initializing each document in a random cluster");
+		System.out.println("Clustering: pre-processing the data");
 
+		
+		KMeans clusterer = new KMeans(8,NUMBER_OF_PASS);		
+		DefaultDataset clusteringDataset = new DefaultDataset();
+		
+		//Pre-process all postings to give them a unique id
+		HashMap<String, Integer> termsToUniqueIds = new HashMap<String, Integer>();
+		int c = 0;
+		for (String s : index) {
+			termsToUniqueIds.put(s, c++);
+		}
+		
 		while (docList.isEmpty() == false) {
-			WeightedDocument document = docList.poll();
-			if (document.getVector() != null)
-				clusterList.get((int) (Math.random()*5)).addDocument(document);
+			WeightedDocument wd = docList.poll();
+			//Creating a new SparseInstance with index.size dimensions, the non-specified dimensions will have the value 0
+			SparseInstance i = new SparseInstance(index.size(), 0.0);
+			if (wd.getVector() == null)
+				continue;
+			i.putAll(wd.getVector().getVector());
+			clusteringDataset.add(i);
 		}
 
-		for (int x=1; x<=NUMBER_OF_PASS; x++) {
-			for (Cluster c : clusterList) {
-				//Recompute centroid location and remove all documents from cluster for re-asssignment
-				c.getCentroid(true);
-				docList.addAll(c.getMembersAndRemove());
-			}
+		System.out.println("Clustering...");
 
-			System.out.println("Pass " + x + " of " + NUMBER_OF_PASS);
-			while (docList.isEmpty() == false) {
-				//Pick a document
-				WeightedDocument document = docList.poll();
+		clusterer.cluster(clusteringDataset);
 
-				//Reassign it
-				findClosestCluster(document).addDocument(document);
-			}
-		}
 		
 		clusteringBenchmark.stop();
 		System.out.println(clusteringBenchmark.toString());
