@@ -40,6 +40,10 @@ public class ResultSet implements Iterable<Result>{
 	}
 
 
+	public ResultSet() {
+
+	}
+
 	private static Collection<Result> generateResult(Collection<Posting> matchingDocument) {
 		HashSet<Result> resultSet = new HashSet<Result>();
 		for (Posting p : matchingDocument) 
@@ -53,6 +57,10 @@ public class ResultSet implements Iterable<Result>{
 
 	public Collection<Result> getResults() {
 		return this.results;
+	}
+	
+	public void addResult(Result r) {
+		this.results.add(r);
 	}
 
 	@Override

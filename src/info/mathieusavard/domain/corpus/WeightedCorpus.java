@@ -28,6 +28,7 @@ public class WeightedCorpus extends Corpus {
 		super();
 	}
 	
+	
 	public void closeIndex(){
 		computeTFIDFVector();
 		super.closeIndex();

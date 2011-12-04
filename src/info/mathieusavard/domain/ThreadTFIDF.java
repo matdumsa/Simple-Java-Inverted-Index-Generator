@@ -33,8 +33,8 @@ public class ThreadTFIDF extends Thread {
 		}
 	}
 
-	private TFIDFVector getTFIDFVector(LinkedList<Posting> linkedList) {
-		TFIDFVector vector = new TFIDFVector();
+	private VectorTermSpace getTFIDFVector(LinkedList<Posting> linkedList) {
+		VectorTermSpace vector = new VectorTermSpace();
 		if (linkedList != null){
 			for (Posting p : linkedList){
 				vector.getVector().put(p.getTerm(), computeTFIDFScore(p));

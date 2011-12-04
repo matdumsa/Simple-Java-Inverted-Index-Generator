@@ -10,17 +10,17 @@ package info.mathieusavard.domain;
  */
 public class WeightedDocument extends GenericDocument{
 	
-	private TFIDFVector vector;
+	private VectorTermSpace vector;
 	
 	public WeightedDocument(int id, String title) {
 		super(id, title);
 	}
 
-	public TFIDFVector getVector() {
+	public VectorTermSpace getVector() {
 		return vector;
 	}
 
-	public void setVector(TFIDFVector vector) {
+	public void setVector(VectorTermSpace vector) {
 		this.vector = vector;
 	}
 	

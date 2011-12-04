@@ -1,11 +1,14 @@
 package info.mathieusavard.application.console;
 
+import info.mathieusavard.domain.WeightedDocument;
+import info.mathieusavard.domain.corpus.CorpusFactory;
 import info.mathieusavard.domain.index.spimi.GenerateIndex;
 import info.mathieusavard.domain.queryprocessor.QueryProcessor;
 import info.mathieusavard.domain.queryprocessor.RankedResult;
 import info.mathieusavard.domain.queryprocessor.Result;
 import info.mathieusavard.domain.queryprocessor.ResultSet;
 import info.mathieusavard.domain.queryprocessor.booleantree.InvalidQueryException;
+import info.mathieusavard.domain.queryprocessor.clustering.KMeansClustering;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,6 +66,18 @@ public class InteractiveQuery {
 
 			if (query.equals("index")) {
 				GenerateIndex.main(new String[] {});
+			}
+			if (query.equals("cluster")) {
+				KMeansClustering clustering = new KMeansClustering(CorpusFactory.getCorpus(),8);
+				clustering.performClustering();
+				
+				
+				for (int x=0; x<8; x++) {
+					System.out.println("Printing for cluster " + x);
+					for (WeightedDocument d : clustering.peekAtClusters(x, 10)) {
+						resultPrinter.printResult(new Result(d));
+					}
+				}
 			}
 			else if (!(query.equals("quit"))){
 				performQuery(query);

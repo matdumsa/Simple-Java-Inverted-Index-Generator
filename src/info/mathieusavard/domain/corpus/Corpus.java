@@ -10,13 +10,15 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.TreeMap;
 
-public class Corpus {
+public class Corpus implements Iterable<GenericDocument>{
 
 	protected TreeMap<Integer, GenericDocument> documentMap;
 	private static Class<? extends GenericDocument> factory = GenericDocument.class;
 	private boolean readOnly=false; //when a Corpus is created, it is read-write and when finalized, it becomes read-only
+	private boolean isDirty = true;
 	
 	//Default constructor allow only the factory in this package to create instances
 	Corpus() {
@@ -44,10 +46,12 @@ public class Corpus {
 		if (!documentMap.values().contains(d)){
 			documentMap.put(d.getId(), d);
 		}
+		isDirty = true;
 	}
 	
 	public void closeIndex(){
-		writeToDisk();
+		if (isDirty)
+			writeToDisk();
 		readOnly=true;
 	}
 	
@@ -63,6 +67,7 @@ public class Corpus {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		isDirty = false;
 	}
 	
 	public static void readFromDisk() {
@@ -102,8 +107,8 @@ public class Corpus {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		newCorpus.readOnly=true;
-		
+		newCorpus.isDirty = false;
+		newCorpus.closeIndex();
 	}
 	
 	public int getTotalLength() {
@@ -123,5 +128,10 @@ public class Corpus {
 	public int size() {
 		if (documentMap == null) readFromDisk();
 		return documentMap.size();
+	}
+
+	@Override
+	public Iterator<GenericDocument> iterator() {
+		return documentMap.values().iterator();
 	}
 }
