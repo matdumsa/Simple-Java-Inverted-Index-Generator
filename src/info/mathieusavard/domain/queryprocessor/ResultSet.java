@@ -68,6 +68,10 @@ public class ResultSet implements Iterable<Result>{
 		return results.iterator();
 	}
 
+	public void setSuggestedQuery(String suggestedQuery) {
+		this.suggestedQuery = suggestedQuery;
+	}
+	
 	public int size() {
 		if (results == null){
 			return 0;
