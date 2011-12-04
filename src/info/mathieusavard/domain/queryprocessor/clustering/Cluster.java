@@ -56,6 +56,12 @@ public class Cluster {
 		return members.subList(i, numberOfDocument);
 		
 	}
+	
+	public LinkedList<WeightedDocument> getMembersAndRemove() {
+		LinkedList<WeightedDocument> results = members;
+		members = new LinkedList<WeightedDocument>();
+		return results;
+	}
 
 
 }

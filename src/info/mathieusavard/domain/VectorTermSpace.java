@@ -13,7 +13,7 @@ public class VectorTermSpace {
 		vector = new TreeMap<String, Double>();
 	}
 
-	public VectorTermSpace(Map<String, Double> vector) {
+	private VectorTermSpace(Map<String, Double> vector) {
 		this.vector = vector;
 	}
 
@@ -28,7 +28,7 @@ public class VectorTermSpace {
 	public VectorTermSpace add(VectorTermSpace b) {
 		Map<String, Double> result = new HashMap<String, Double>(vector);
 		for (String s : b.vector.keySet()) {
-			Double d = result.get(s);
+			Double d = this.vector.get(s);
 			if (d == null)
 				d = 0.0;
 			d+=b.vector.get(s);
@@ -48,9 +48,8 @@ public class VectorTermSpace {
 		Double distance = 0.0;
 		for (String s :  this.vector.keySet()) {
 			Double x1 = this.vector.get(s);
-			Double x2;
 			if (v.vector.containsKey(s)) {
-				x2 = v.vector.get(s);
+				Double x2 = v.vector.get(s);
 				distance += Math.pow(x1-x2,2);
 			} else {
 				distance += Math.pow(x1,2);

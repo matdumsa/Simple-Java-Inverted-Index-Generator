@@ -139,4 +139,8 @@ public class QueryProcessor {
 		return result;
 	}
 
+	public static DefaultInvertedIndex getIndex() {
+		return index;
+	}
+
 }

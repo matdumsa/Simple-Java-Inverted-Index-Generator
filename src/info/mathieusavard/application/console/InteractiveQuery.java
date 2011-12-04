@@ -68,7 +68,7 @@ public class InteractiveQuery {
 				GenerateIndex.main(new String[] {});
 			}
 			if (query.equals("cluster")) {
-				KMeansClustering clustering = new KMeansClustering(CorpusFactory.getCorpus(),8);
+				KMeansClustering clustering = new KMeansClustering(CorpusFactory.getCorpus(), QueryProcessor.getIndex());
 				clustering.performClustering();
 				
 				
