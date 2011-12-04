@@ -58,7 +58,7 @@ public class GenericDocument implements Comparable<GenericDocument> {
 	}
 	
 	public static GenericDocument fromString(String input) {
-		String[] parts = input.split(":");
+		String[] parts = input.split("#");
 		int id = Integer.parseInt(parts[0]);
 		int length = Integer.parseInt(parts[1]);
 		String title = "???";

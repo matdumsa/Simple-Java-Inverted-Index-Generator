@@ -39,11 +39,11 @@ public class QueryProcessor {
 
 	private static ResultSet performQuery(String query, int attempt) throws InvalidQueryException {
 		matchingDocId = findPostingForQuery(query);
-
+		String newQuery = null;
 		if (matchingDocId.size() == 0) {
 			if (attempt > 2)
 				return null;
-			String newQuery = suggestNewQueryBySpellChecking(query);
+			newQuery = suggestNewQueryBySpellChecking(query);
 			System.out.println("Nothing was found for '" + query + "', Ill search for '" + newQuery + "' instead");
 				performQuery(newQuery, attempt++);
 		}
@@ -55,6 +55,7 @@ public class QueryProcessor {
 		else{
 			result = ResultSetFactory.createResultSet(index, query, compressQuery(query),matchingDocId);
 		}
+		result.setSuggestedQuery(newQuery);
 		return result;
 	}
 

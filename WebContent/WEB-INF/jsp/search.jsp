@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"
-	import="info.mathieusavard.domain.GenericDocument,java.util.List,info.mathieusavard.domain.queryprocessor.QueryProcessor,info.mathieusavard.technicalservices.BenchmarkRow"%>
+	import="info.mathieusavard.domain.WebDocument,info.mathieusavard.domain.GenericDocument,java.util.List,info.mathieusavard.domain.queryprocessor.QueryProcessor,info.mathieusavard.technicalservices.BenchmarkRow"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
@@ -19,13 +19,23 @@
 			</h2>
 		</c:when>
 		<c:otherwise>
-
-	I found ${resultcount } results in${timetomatch} ms.
+	
+	For Query : ${resultset.userInputQuery}
+	<c:choose>
+			<c:when test="${resultset.suggestedQuery != null}">
+			<h2>
+				<font size="3" color="red">Did you mean ?</font> <font size="3">${resultset.suggestedQuery }</font>
+			</h2>
+			</c:when>
+	 </c:choose>
+	I found ${resultcount} results in ${timetomatch} ms.
 
 	<c:forEach var="r" items="${resultset.results}">
 				<h3>
-					<a href="document/view/?d=${r.document.id }&q=${query}">
-						${r.document.title} </a>
+				<!--	<a href="document/view/?d=${r.document.id }&q=${query}">
+						${r.document.title} </a>-->
+
+					<a href="${r.document.url}"> ${r.document.title} </a>	
 				</h3>
 			</c:forEach>
 		</c:otherwise>
